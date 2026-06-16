@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
-import TextShuffle from '../components/TextShuffle';
-import ScrollReveal from '../components/ScrollReveal';
-import TiltCard from '../components/TiltCard';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import Link from 'next/link';
+import TextShuffle from '../../components/TextShuffle';
+import ScrollReveal from '../../components/ScrollReveal';
+import TiltCard from '../../components/TiltCard';
 import {
   TrendingUp, Award, Clock, DollarSign, CreditCard, Copy, Check,
   User, Phone, Mail, Hash, FileText, AlertCircle, Plus
 } from 'lucide-react';
-import './Dashboard.css';
 
 export default function Dashboard() {
   const { userData } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [referralLink, setReferralLink] = useState('');
 
   const totalShares = (userData?.shares || 0) + (userData?.awardedFreeShares || 0);
   const investedAmount = (userData?.shares || 0) * 500;
@@ -20,12 +22,19 @@ export default function Dashboard() {
   const freeShares = userData?.awardedFreeShares || 0;
   const hasActiveInvestment = userData?.investments?.some(inv => inv.status === 'Active');
   const accountStatus = hasActiveInvestment || (userData?.shares || 0) > 0 ? 'Active' : 'Pending';
-  const referralLink = `${window.location.origin}/register?ref=${userData?.id || '1001'}`;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setReferralLink(`${window.location.origin}/register?ref=${userData?.id || '1001'}`);
+    }
+  }, [userData]);
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (referralLink) {
+      navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -39,7 +48,7 @@ export default function Dashboard() {
               <h1>Welcome, <span className="gradient-text">{userData?.name || 'Investor'}</span></h1>
               <p className="dash-sub">Your investment overview and portfolio tracker.</p>
             </div>
-            <Link to="/buy-shares" className="btn btn-primary">
+            <Link href="/buy-shares" className="btn btn-primary">
               <Plus size={16} /> <TextShuffle>Buy Shares</TextShuffle>
             </Link>
           </header>
@@ -120,7 +129,7 @@ export default function Dashboard() {
                     <AlertCircle size={36} />
                     <h4>No Investments Yet</h4>
                     <p>Submit your first share purchase request to get started.</p>
-                    <Link to="/buy-shares" className="btn btn-secondary">Buy Shares</Link>
+                    <Link href="/buy-shares" className="btn btn-secondary">Buy Shares</Link>
                   </div>
                 )}
               </div>

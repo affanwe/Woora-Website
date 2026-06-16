@@ -1,8 +1,9 @@
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import TextShuffle from './TextShuffle';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import './Footer.css';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,7 +12,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer-top">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo">
+          <Link href="/" className="footer-logo">
             <span className="logo-mark">W</span>
             <span className="logo-text">WOORA GROUP</span>
           </Link>
@@ -23,10 +24,10 @@ export default function Footer() {
         <div className="footer-links-col">
           <h4 className="footer-heading">Navigation</h4>
           <ul className="footer-link-list">
-            <li><Link to="/"><TextShuffle>Home</TextShuffle></Link></li>
-            <li><Link to="/projects"><TextShuffle>Projects</TextShuffle></Link></li>
-            <li><Link to="/about"><TextShuffle>About</TextShuffle></Link></li>
-            <li><Link to="/login"><TextShuffle>Investor Login</TextShuffle></Link></li>
+            <li><Link href="/"><TextShuffle>Home</TextShuffle></Link></li>
+            <li><Link href="/projects"><TextShuffle>Projects</TextShuffle></Link></li>
+            <li><Link href="/about"><TextShuffle>About</TextShuffle></Link></li>
+            <li><Link href="/login"><TextShuffle>Investor Login</TextShuffle></Link></li>
           </ul>
         </div>
 

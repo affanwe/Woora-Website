@@ -1,7 +1,8 @@
+"use client";
+
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import './GlobalBackground.css';
 
 /* Single interactive cube component */
 function CubeMesh({ position, size, rotationSpeed, floatSpeed, floatRange, seed, color, isWireframe, scrollYRef, mouseRef }) {

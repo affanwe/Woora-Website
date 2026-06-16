@@ -1,10 +1,11 @@
+"use client";
+
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import TextShuffle from '../components/TextShuffle';
-import ScrollReveal from '../components/ScrollReveal';
-import { Landmark, ArrowLeft, Copy, Check, Info, ShieldAlert, Sparkles } from 'lucide-react';
-import './BuyShares.css';
+import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/navigation';
+import TextShuffle from '../../components/TextShuffle';
+import ScrollReveal from '../../components/ScrollReveal';
+import { Landmark, ArrowLeft, Copy, Check, Sparkles, ShieldAlert } from 'lucide-react';
 
 export default function BuyShares() {
   const { requestShares, userData } = useAuth();
@@ -15,7 +16,7 @@ export default function BuyShares() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [copiedNum, setCopiedNum] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   const amount = sharesCount * 500;
 
   const paymentNumbers = {
@@ -64,7 +65,7 @@ export default function BuyShares() {
               </div>
               <p className="success-note">Our team will verify and activate your shares within 1–4 business hours.</p>
               <div className="success-btns">
-                <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>
+                <button className="btn btn-primary" onClick={() => router.push('/dashboard')}>
                   <TextShuffle>Go to Dashboard</TextShuffle>
                 </button>
                 <button className="btn btn-secondary" onClick={() => { setSuccess(false); setTrxId(''); setSharesCount(10); }}>
@@ -81,7 +82,7 @@ export default function BuyShares() {
   return (
     <div className="buy-page">
       <div className="container buy-content">
-        <button className="back-btn" onClick={() => navigate('/dashboard')}>
+        <button className="back-btn" onClick={() => router.push('/dashboard')}>
           <ArrowLeft size={16} /> Back to Dashboard
         </button>
 

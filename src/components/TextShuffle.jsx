@@ -1,5 +1,6 @@
+"use client";
+
 import { useRef, useCallback } from 'react';
-import './TextShuffle.css';
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
 const DURATION = 300; // total scramble duration in ms

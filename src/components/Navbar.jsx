@@ -1,16 +1,18 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import TextShuffle from './TextShuffle';
 import { Menu, X, LogOut, Database } from 'lucide-react';
-import './Navbar.css';
 
 export default function Navbar() {
   const { currentUser, userData, logout, isDemoMode } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +25,7 @@ export default function Navbar() {
   // Close menu on route change
   useEffect(() => {
     setIsOpen(false);
-  }, [location.pathname]);
+  }, [pathname]);
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -34,14 +36,14 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      router.push('/');
       setIsOpen(false);
     } catch (error) {
       console.error("Failed to log out", error);
     }
   };
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => pathname === path;
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -60,7 +62,7 @@ export default function Navbar() {
     <>
       <nav className={`navbar ${scrolled ? 'is-scrolled' : ''} ${isOpen ? 'is-open' : ''}`}>
         <div className="navbar-inner container">
-          <Link to="/" className="navbar-logo">
+          <Link href="/" className="navbar-logo">
             <span className="logo-mark">W</span>
             <TextShuffle className="logo-text">WOORA</TextShuffle>
             {isDemoMode && (
@@ -75,7 +77,7 @@ export default function Navbar() {
             {allLinks.map(link => (
               <Link
                 key={link.path}
-                to={link.path}
+                href={link.path}
                 className={`nav-link ${isActive(link.path) ? 'is-active' : ''}`}
               >
                 <TextShuffle>{link.label}</TextShuffle>
@@ -89,7 +91,7 @@ export default function Navbar() {
                 <TextShuffle>Logout</TextShuffle>
               </button>
             ) : (
-              <Link to="/login" className="btn btn-primary nav-cta">
+              <Link href="/login" className="btn btn-primary nav-cta">
                 <TextShuffle>Invest Now</TextShuffle>
               </Link>
             )}
@@ -113,7 +115,7 @@ export default function Navbar() {
             {allLinks.map((link, i) => (
               <Link
                 key={link.path}
-                to={link.path}
+                href={link.path}
                 className={`mobile-nav-link ${isActive(link.path) ? 'is-active' : ''}`}
                 style={{ transitionDelay: isOpen ? `${i * 0.06}s` : '0s' }}
                 onClick={() => setIsOpen(false)}
@@ -137,10 +139,10 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="mobile-auth-buttons">
-                <Link to="/login" className="btn btn-primary btn-block" onClick={() => setIsOpen(false)}>
+                <Link href="/login" className="btn btn-primary btn-block" onClick={() => setIsOpen(false)}>
                   Login
                 </Link>
-                <Link to="/register" className="btn btn-secondary btn-block" onClick={() => setIsOpen(false)}>
+                <Link href="/register" className="btn btn-secondary btn-block" onClick={() => setIsOpen(false)}>
                   Register
                 </Link>
               </div>

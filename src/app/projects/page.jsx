@@ -1,5 +1,7 @@
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import {
   ArrowRight,
   TrendingUp,
@@ -12,9 +14,8 @@ import {
   Factory,
   Sun
 } from 'lucide-react';
-import ScrollReveal from '../components/ScrollReveal';
-import TiltCard from '../components/TiltCard';
-import './Projects.css';
+import ScrollReveal from '../../components/ScrollReveal';
+import TiltCard from '../../components/TiltCard';
 
 const projects = [
   {
@@ -187,7 +188,7 @@ export default function Projects() {
                       </div>
 
                       {/* CTA */}
-                      <Link to="/buy-shares" className="project-card__btn">
+                      <Link href="/buy-shares" className="project-card__btn">
                         Learn More <ArrowRight size={16} />
                       </Link>
                     </div>

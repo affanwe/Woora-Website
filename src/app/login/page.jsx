@@ -1,10 +1,12 @@
+"use client";
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 import { LogIn, Eye, EyeOff, Mail, Lock, Database, ArrowRight } from 'lucide-react';
-import TextShuffle from '../components/TextShuffle';
-import ScrollReveal from '../components/ScrollReveal';
-import './Auth.css';
+import TextShuffle from '../../components/TextShuffle';
+import ScrollReveal from '../../components/ScrollReveal';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,7 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const { login, isDemoMode } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ export default function Login() {
       setError('');
       setLoading(true);
       await login(email, password);
-      navigate('/dashboard');
+      router.push('/dashboard');
     } catch (err) {
       console.error(err);
       if (isDemoMode) {
@@ -148,7 +150,7 @@ export default function Login() {
             <div className="auth-footer-3d">
               <p>
                 New to WOORA Group?{' '}
-                <Link to="/register" className="auth-link-3d">
+                <Link href="/register" className="auth-link-3d">
                   <TextShuffle>Create an Account</TextShuffle>
                   <ArrowRight size={14} />
                 </Link>

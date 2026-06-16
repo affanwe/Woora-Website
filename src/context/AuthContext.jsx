@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   createUserWithEmailAndPassword, 
@@ -5,7 +7,7 @@ import {
   signOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
-import { doc, getDoc, runTransaction, setDoc, addDoc, collection, getDocs, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, runTransaction, setDoc, collection, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -22,7 +24,7 @@ export function AuthProvider({ children }) {
 
   // Check if Firebase is configured with real credentials
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
     if (!apiKey || apiKey === 'your_api_key_here') {
       console.warn("WOORA Portal running in DEMO MODE. Configure Firebase in .env to connect to live DB.");
       setIsDemoMode(true);

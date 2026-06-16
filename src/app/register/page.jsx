@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 import {
   UserPlus,
   Eye,
@@ -13,9 +16,8 @@ import {
   Database,
   ArrowRight
 } from 'lucide-react';
-import TextShuffle from '../components/TextShuffle';
-import ScrollReveal from '../components/ScrollReveal';
-import './Auth.css';
+import TextShuffle from '../../components/TextShuffle';
+import ScrollReveal from '../../components/ScrollReveal';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -31,7 +33,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
 
   const { register, isDemoMode } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,7 +75,7 @@ export default function Register() {
       setError('');
       setLoading(true);
       await register(name, email, cleanMobile, password, cleanNid);
-      navigate('/dashboard');
+      router.push('/dashboard');
     } catch (err) {
       console.error(err);
       setError(
@@ -283,7 +285,7 @@ export default function Register() {
             <div className="auth-footer-3d">
               <p>
                 Already have an account?{' '}
-                <Link to="/login" className="auth-link-3d">
+                <Link href="/login" className="auth-link-3d">
                   <TextShuffle>Login Here</TextShuffle>
                   <ArrowRight size={14} />
                 </Link>

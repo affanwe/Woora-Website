@@ -1,5 +1,7 @@
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import {
   Eye,
   Target,
@@ -13,8 +15,7 @@ import {
   FolderKanban,
   ArrowRight
 } from 'lucide-react';
-import ScrollReveal from '../components/ScrollReveal';
-import './About.css';
+import ScrollReveal from '../../components/ScrollReveal';
 
 const stats = [
   { icon: CalendarDays, label: 'Founded', value: '2023', color: 'emerald' },
@@ -216,10 +217,10 @@ export default function About() {
                 Join 15,000+ investors already building wealth with WOORA Group.
               </p>
               <div className="about-cta__actions">
-                <Link to="/register" className="btn btn-primary">
+                <Link href="/register" className="btn btn-primary">
                   Get Started <ArrowRight size={16} />
                 </Link>
-                <Link to="/projects" className="btn btn-secondary">
+                <Link href="/projects" className="btn btn-secondary">
                   View Projects
                 </Link>
               </div>

@@ -1,5 +1,6 @@
+"use client";
+
 import { useRef, useState, useCallback, useEffect } from 'react';
-import './TiltCard.css';
 
 const MAX_TILT = 8; // degrees
 

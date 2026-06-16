@@ -1,11 +1,12 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import TextShuffle from '../components/TextShuffle';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import { ArrowRight, TrendingUp, Users, Wallet, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
-import './Home.css';
 
 // Animated character reveal — each character appears one at a time, wrapping at word boundaries
 function AnimatedText({ text, className = '', delay = 0 }) {
@@ -129,11 +130,11 @@ export default function Home() {
             Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳500 per share.
           </p>
           <div className="hero-actions hero-animate-in" style={{ animationDelay: '2.6s' }}>
-            <Link to={currentUser ? '/dashboard' : '/register'} className="btn btn-primary btn-lg hero-btn-glow">
+            <Link href={currentUser ? '/dashboard' : '/register'} className="btn btn-primary btn-lg hero-btn-glow">
               <TextShuffle>Get Started</TextShuffle>
               <ArrowRight size={18} />
             </Link>
-            <Link to="/projects" className="btn btn-secondary btn-lg">
+            <Link href="/projects" className="btn btn-secondary btn-lg">
               <TextShuffle>View Projects</TextShuffle>
             </Link>
           </div>
@@ -186,7 +187,7 @@ export default function Home() {
             {projects.map((project, i) => (
               <ScrollReveal key={i} delay={i * 0.1}>
                 <Link
-                  to={currentUser ? '/buy-shares' : '/login'}
+                  href={currentUser ? '/buy-shares' : '/login'}
                   className="featured-item"
                 >
                   <div className="featured-item-inner">
@@ -213,7 +214,7 @@ export default function Home() {
 
           <ScrollReveal>
             <div className="text-center" style={{ marginTop: '48px' }}>
-              <Link to="/projects" className="btn btn-secondary">
+              <Link href="/projects" className="btn btn-secondary">
                 <TextShuffle>View All Projects</TextShuffle>
                 <ArrowRight size={16} />
               </Link>
@@ -287,7 +288,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <Link to={currentUser ? '/buy-shares' : '/register'} className="btn btn-primary btn-block">
+                <Link href={currentUser ? '/buy-shares' : '/register'} className="btn btn-primary btn-block">
                   <TextShuffle>Start Investing</TextShuffle>
                   <ArrowRight size={16} />
                 </Link>
