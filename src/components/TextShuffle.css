@@ -1,0 +1,9 @@
+/* ─── TextShuffle.css ─── */
+
+.text-shuffle {
+  display: inline-block;
+  cursor: default;
+  white-space: pre; /* preserve spaces during scramble */
+  font-variant-ligatures: none; /* prevent ligature jumps during scramble */
+  -webkit-font-smoothing: antialiased;
+}

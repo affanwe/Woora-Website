@@ -1,0 +1,40 @@
+/* ─── GlobalBackground.css ─── */
+
+.global-3d-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #080808 0%, #030303 100%);
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(1.03); /* start slightly zoomed in */
+  transition: opacity 2.5s ease-out, transform 3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.global-3d-bg.loaded {
+  opacity: 1;
+  transform: scale(1); /* settle to normal size */
+}
+
+.global-3d-bg canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+/* Subtle dark vignette overlay to protect text readability and soften cube glares */
+.global-3d-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(5, 5, 5, 0.05) 0%,   /* brighter center (from 0.2) to make cubes more visible */
+    rgba(5, 5, 5, 0.75) 100%  /* softer edge (from 0.8) */
+  );
+  z-index: 1; /* Sits above Canvas but below DOM page content */
+}

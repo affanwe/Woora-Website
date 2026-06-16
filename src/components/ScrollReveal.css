@@ -1,0 +1,10 @@
+/* ─── ScrollReveal.css ─── */
+
+.scroll-reveal {
+  will-change: transform, opacity;
+}
+
+/* Hide before GSAP initialises to prevent flash of un-animated content */
+.scroll-reveal > * {
+  will-change: transform, opacity;
+}
