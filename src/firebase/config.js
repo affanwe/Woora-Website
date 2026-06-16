@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -11,10 +11,17 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || process.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app = null;
+let auth = null;
+let db = null;
 
-// Initialize Services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your_api_key_here') {
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  auth = getAuth(app);
+  db = getFirestore(app);
+} else {
+  console.warn('Firebase API key is missing. Firebase will not be initialized. App will run in Demo Mode.');
+}
+
+export { auth, db };
 export default app;
