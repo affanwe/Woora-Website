@@ -1,14 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { doc, runTransaction, setDoc, collection, onSnapshot, query, where } from 'firebase/firestore';
-import { auth, db } from '../firebase/config';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -20,64 +13,112 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isDemoMode, setIsDemoMode] = useState(false);
   const [profitData, setProfitData] = useState(null);
   const [returnPayments, setReturnPayments] = useState([]);
   const [shareRequests, setShareRequests] = useState([]);
 
-  // DEMO MODE HELPERS
-  const getDemoInvestors = () => JSON.parse(localStorage.getItem('demo_investors') || '[]');
-  const saveDemoInvestors = (data) => localStorage.setItem('demo_investors', JSON.stringify(data));
-  const getDemoRequests = () => JSON.parse(localStorage.getItem('demo_requests') || '[]');
-  const saveDemoRequests = (data) => localStorage.setItem('demo_requests', JSON.stringify(data));
-  const getDemoReturnPayments = () => JSON.parse(localStorage.getItem('demo_returnPayments') || '[]');
-  const saveDemoReturnPayments = (data) => localStorage.setItem('demo_returnPayments', JSON.stringify(data));
-
-  // Check if Firebase is configured with real credentials
+  // Auth state listener
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY;
-    if (!apiKey || apiKey === 'your_api_key_here') {
-      console.warn("WOORA Portal running in DEMO MODE. Configure Firebase in .env to connect to live DB.");
-      setIsDemoMode(true);
-      
-      // Load mock session if any
-      const savedUser = localStorage.getItem('demo_user');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        setCurrentUser({ email: user.email, uid: user.uid });
-        // Fetch current profile from demo database
-        const investors = JSON.parse(localStorage.getItem('demo_investors') || '[]');
-        const investor = investors.find(inv => inv.email === user.email);
-        setUserData(investor || null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user || null;
+      setCurrentUser(user);
+      if (user) {
+        const { data: investor } = await supabase
+          .from('investors')
+          .select('*')
+          .eq('uid', user.id)
+          .maybeSingle();
+        setUserData(investor ? mapInvestor(investor) : null);
+      } else {
+        setUserData(null);
       }
       setLoading(false);
-    } else {
-      setIsDemoMode(false);
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        setCurrentUser(user);
-        if (user) {
-          // Listen to changes on the investor's document
-          const docRef = doc(db, 'investors', user.uid);
-          const unsubscribeDoc = onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists()) {
-              setUserData(docSnap.data());
-            } else {
-              setUserData(null);
-            }
-            setLoading(false);
-          }, (error) => {
-            console.error("Error listening to investor data: ", error);
+    });
+
+    // Check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const user = session?.user || null;
+      setCurrentUser(user);
+      if (user) {
+        supabase.from('investors').select('*').eq('uid', user.id).maybeSingle()
+          .then(({ data: investor }) => {
+            setUserData(investor ? mapInvestor(investor) : null);
             setLoading(false);
           });
-          return () => unsubscribeDoc();
-        } else {
-          setUserData(null);
-          setLoading(false);
-        }
-      });
-      return unsubscribe;
-    }
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const mapInvestor = (row) => ({
+    id: row.id,
+    uid: row.uid,
+    name: row.name,
+    email: row.email,
+    mobile: row.mobile,
+    nid: row.nid,
+    shares: row.shares,
+    amount: row.amount,
+    investments: [],
+    awardedFreeShares: row.awarded_free_shares,
+    referredBy: row.referred_by,
+    status: row.status,
+    createdAt: row.created_at
+  });
+
+  // Real-time investor data subscription
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const channel = supabase
+      .channel('investor-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'investors',
+        filter: `uid=eq.${currentUser.id}`
+      }, async (payload) => {
+        if (payload.new) {
+          const investor = mapInvestor(payload.new);
+          const { data: investments } = await supabase
+            .from('investments')
+            .select('*')
+            .eq('investor_id', investor.id)
+            .order('created_at', { ascending: true });
+          investor.investments = (investments || []).map(inv => ({
+            shares: inv.shares, amount: inv.amount,
+            joiningDate: inv.joining_date, activationDate: inv.activation_date,
+            status: inv.status, paymentMethod: inv.payment_method, trxId: inv.trx_id
+          }));
+          setUserData(investor);
+        }
+      })
+      .subscribe();
+
+    // Also load investments initially
+    if (userData?.id) {
+      supabase.from('investments').select('*')
+        .eq('investor_id', userData.id)
+        .order('created_at', { ascending: true })
+        .then(({ data: investments }) => {
+          if (investments && userData) {
+            setUserData(prev => prev ? {
+              ...prev,
+              investments: investments.map(inv => ({
+                shares: inv.shares, amount: inv.amount,
+                joiningDate: inv.joining_date, activationDate: inv.activation_date,
+                status: inv.status, paymentMethod: inv.payment_method, trxId: inv.trx_id
+              }))
+            } : prev);
+          }
+        });
+    }
+
+    return () => supabase.removeChannel(channel);
+  }, [currentUser?.id]);
 
   // Fetch profit data (returnPayments) for logged-in investor
   useEffect(() => {
@@ -87,56 +128,49 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    if (isDemoMode) {
-      const allPayments = getDemoReturnPayments();
-      const myPayments = allPayments.filter(p => p.investorId === userData.id);
-      myPayments.sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month));
-      setReturnPayments(myPayments);
+    const fetchPayments = async () => {
+      const { data: payments } = await supabase
+        .from('return_payments')
+        .select('*')
+        .eq('investor_id', userData.id)
+        .order('year', { ascending: false });
+
+      const mapped = (payments || []).map(p => ({
+        docId: p.id, investorId: p.investor_id, investorName: p.investor_name,
+        year: p.year, month: p.month, profitPerShare: p.profit_per_share,
+        activeShares: p.active_shares, amount: p.total_amount,
+        status: p.payment_status, paymentMethod: p.payment_method,
+        trxId: p.trx_id, lastUpdated: p.last_updated
+      }));
+      setReturnPayments(mapped);
 
       const now = new Date();
       const currentMonth = now.getMonth() + 1;
       const currentYear = now.getFullYear();
-      const totalProfit = myPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-      const pendingProfit = myPayments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.amount || 0), 0);
-      const thisMonthPayment = myPayments.find(p => p.month === currentMonth && p.year === currentYear);
+      const totalProfit = mapped.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const pendingProfit = mapped.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.amount || 0), 0);
+      const thisMonthPayment = mapped.find(p => p.month === currentMonth && p.year === currentYear);
       setProfitData({
         totalProfit,
         pendingProfit,
         thisMonthProfit: thisMonthPayment ? thisMonthPayment.amount : 0,
       });
-      return;
-    }
+    };
 
-    // Firebase: query returnPayments where investorId matches
-    const q = query(
-      collection(db, 'returnPayments'),
-      where('investorId', '==', userData.id)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const payments = [];
-      snapshot.forEach((docSnap) => {
-        payments.push({ docId: docSnap.id, ...docSnap.data() });
-      });
-      payments.sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month));
-      setReturnPayments(payments);
+    fetchPayments();
 
-      const now = new Date();
-      const currentMonth = now.getMonth() + 1;
-      const currentYear = now.getFullYear();
-      const totalProfit = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
-      const pendingProfit = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.amount || 0), 0);
-      const thisMonthPayment = payments.find(p => p.month === currentMonth && p.year === currentYear);
-      setProfitData({
-        totalProfit,
-        pendingProfit,
-        thisMonthProfit: thisMonthPayment ? thisMonthPayment.amount : 0,
-      });
-    }, (error) => {
-      console.error("Error fetching return payments:", error);
-    });
+    const channel = supabase
+      .channel('return-payments-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'return_payments',
+        filter: `investor_id=eq.${userData.id}`
+      }, () => fetchPayments())
+      .subscribe();
 
-    return () => unsubscribe();
-  }, [userData?.id, isDemoMode]);
+    return () => supabase.removeChannel(channel);
+  }, [userData?.id]);
 
   // Real-time listener for share requests
   useEffect(() => {
@@ -145,133 +179,90 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    if (isDemoMode) {
-      const allRequests = getDemoRequests();
-      const myRequests = allRequests.filter(r => r.investorId === userData.id);
-      myRequests.sort((a, b) => new Date(b.dateRequested) - new Date(a.dateRequested));
-      setShareRequests(myRequests);
-      return;
-    }
+    const fetchRequests = async () => {
+      const { data: requests } = await supabase
+        .from('share_requests')
+        .select('*')
+        .eq('investor_id', userData.id)
+        .order('date_requested', { ascending: false });
 
-    // Firebase: listen to shareRequests for this investor
-    const q = query(
-      collection(db, 'shareRequests'),
-      where('investorId', '==', userData.id)
-    );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const requests = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        requests.push({
-          docId: docSnap.id,
-          ...data,
-          dateRequested: data.dateRequested?.toDate ? data.dateRequested.toDate().toISOString() : data.dateRequested,
-        });
-      });
-      requests.sort((a, b) => new Date(b.dateRequested) - new Date(a.dateRequested));
-      setShareRequests(requests);
-    }, (error) => {
-      console.error("Error fetching share requests:", error);
-    });
+      setShareRequests((requests || []).map(r => ({
+        docId: r.id, id: r.id, investorId: r.investor_id, investorName: r.investor_name,
+        sharesCount: r.shares_count, amount: r.amount,
+        paymentMethod: r.payment_method, trxId: r.trx_id,
+        status: r.status, rejectReason: r.reject_reason,
+        dateRequested: r.date_requested
+      })));
+    };
 
-    return () => unsubscribe();
-  }, [userData?.id, isDemoMode]);
+    fetchRequests();
+
+    const channel = supabase
+      .channel('share-requests-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'share_requests',
+        filter: `investor_id=eq.${userData.id}`
+      }, () => fetchRequests())
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [userData?.id]);
 
   // Sign Up / Register
   async function register(name, email, mobile, password, nid, referredBy) {
-    if (isDemoMode) {
-      const investors = getDemoInvestors();
-      if (investors.find(inv => inv.email === email)) {
-        throw new Error("Email already in use.");
-      }
-      const nextId = String(1001 + investors.length);
-      const uid = 'demo_uid_' + Math.random().toString(36).substr(2, 9);
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/login` }
+    });
+    if (authError) throw authError;
 
-      const newInvestor = {
-        uid,
-        id: nextId,
-        name,
-        email,
-        mobile,
-        nid,
-        shares: 0,
-        amount: 0,
-        investments: [],
-        awardedFreeShares: 0,
-        referredBy: referredBy || null,
-        createdAt: new Date().toISOString()
-      };
-      
-      investors.push(newInvestor);
-      saveDemoInvestors(investors);
-      
-      const userSession = { email, uid };
-      localStorage.setItem('demo_user', JSON.stringify(userSession));
-      setCurrentUser(userSession);
-      setUserData(newInvestor);
-      return newInvestor;
-    } else {
-      // Create user auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Perform Firestore Transaction to generate unique sequential ID
-      const counterRef = doc(db, 'metadata', 'counters');
-      const investorRef = doc(db, 'investors', user.uid);
-      
-      await runTransaction(db, async (transaction) => {
-        const counterSnap = await transaction.get(counterRef);
-        let nextId = 1001;
-        if (counterSnap.exists()) {
-          nextId = (counterSnap.data().lastInvestorId || 1000) + 1;
-        }
-        
-        transaction.set(counterRef, { lastInvestorId: nextId }, { merge: true });
-        transaction.set(investorRef, {
-          id: String(nextId),
-          name,
-          email,
-          mobile,
-          nid,
-          shares: 0,
-          amount: 0,
-          investments: [],
-          awardedFreeShares: 0,
-          referredBy: referredBy || null,
-          createdAt: new Date().toISOString()
-        });
-      });
-    }
+    const user = authData.user;
+    if (!user) throw new Error("Registration failed");
+
+    // Generate sequential investor ID
+    const { data: counterData } = await supabase
+      .from('metadata')
+      .select('value')
+      .eq('key', 'counters')
+      .single();
+
+    const lastId = counterData?.value?.lastInvestorId || 1000;
+    const nextId = lastId + 1;
+
+    await supabase.from('metadata').update({
+      value: { ...counterData.value, lastInvestorId: nextId }
+    }).eq('key', 'counters');
+
+    const { error: investorError } = await supabase.from('investors').insert({
+      id: String(nextId),
+      uid: user.id,
+      name,
+      email,
+      mobile,
+      nid,
+      shares: 0,
+      amount: 0,
+      awarded_free_shares: 0,
+      referred_by: referredBy || null
+    });
+    if (investorError) throw investorError;
   }
 
   // Login
   async function login(email, password) {
-    if (isDemoMode) {
-      const investors = getDemoInvestors();
-      const investor = investors.find(inv => inv.email === email);
-      if (!investor) {
-        throw new Error("User not found in local demo database.");
-      }
-      // Demo password is "password" by default for easy testing, or check if it matches
-      const userSession = { email, uid: investor.uid };
-      localStorage.setItem('demo_user', JSON.stringify(userSession));
-      setCurrentUser(userSession);
-      setUserData(investor);
-      return investor;
-    } else {
-      return signInWithEmailAndPassword(auth, email, password);
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   }
 
   // Logout
   async function logout() {
-    if (isDemoMode) {
-      localStorage.removeItem('demo_user');
-      setCurrentUser(null);
-      setUserData(null);
-    } else {
-      return signOut(auth);
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    setCurrentUser(null);
+    setUserData(null);
   }
 
   // Create share request
@@ -279,86 +270,26 @@ export function AuthProvider({ children }) {
     if (!currentUser || !userData) throw new Error("Must be logged in.");
 
     const amount = sharesCount * 500;
-    const dateRequested = new Date().toISOString();
 
-    if (isDemoMode) {
-      const requests = getDemoRequests();
-      const nextReqId = 'req_' + Math.random().toString(36).substr(2, 9);
-      const newRequest = {
-        id: nextReqId,
-        investorId: userData.id,
-        investorName: userData.name,
-        sharesCount,
-        amount,
-        paymentMethod,
-        trxId,
-        status: 'Pending',
-        dateRequested
-      };
-      requests.push(newRequest);
-      saveDemoRequests(requests);
+    const { data: newRequest, error } = await supabase.from('share_requests').insert({
+      investor_id: userData.id,
+      investor_name: userData.name,
+      shares_count: sharesCount,
+      amount,
+      payment_method: paymentMethod,
+      trx_id: trxId,
+      status: 'Pending'
+    }).select().single();
+    if (error) throw error;
 
-      // Update shareRequests state immediately
-      const myRequests = requests.filter(r => r.investorId === userData.id);
-      myRequests.sort((a, b) => new Date(b.dateRequested) - new Date(a.dateRequested));
-      setShareRequests(myRequests);
-
-      // Add request to local user investments array for instantaneous feedback
-      const investors = getDemoInvestors();
-      const updatedInvestors = investors.map(inv => {
-        if (inv.id === userData.id) {
-          const updatedInvestments = [...(inv.investments || []), {
-            shares: sharesCount,
-            amount,
-            joiningDate: dateRequested.split('T')[0],
-            status: 'Pending',
-            trxId
-          }];
-          return { ...inv, investments: updatedInvestments };
-        }
-        return inv;
-      });
-      saveDemoInvestors(updatedInvestors);
-      setUserData(updatedInvestors.find(inv => inv.id === userData.id));
-
-      return newRequest;
-    } else {
-      // Create request in shareRequests collection
-      const newRequestRef = doc(collection(db, 'shareRequests'));
-      const newRequest = {
-        id: newRequestRef.id,
-        investorId: userData.id,
-        investorName: userData.name,
-        sharesCount,
-        amount,
-        paymentMethod,
-        trxId,
-        status: 'Pending',
-        dateRequested: new Date() // Store as Firestore Timestamp
-      };
-
-      await setDoc(newRequestRef, newRequest);
-
-      // Append pending investment inside the user's investments list for convenience
-      const userRef = doc(db, 'investors', currentUser.uid);
-      const updatedInvestments = [...(userData.investments || []), {
-        shares: sharesCount,
-        amount,
-        joiningDate: new Date().toISOString().split('T')[0],
-        status: 'Pending',
-        trxId
-      }];
-      await setDoc(userRef, { investments: updatedInvestments }, { merge: true });
-
-      return newRequest;
-    }
+    return newRequest;
   }
 
   const value = {
     currentUser,
     userData,
     loading,
-    isDemoMode,
+    isDemoMode: false,
     profitData,
     returnPayments,
     shareRequests,
