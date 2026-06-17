@@ -114,10 +114,6 @@ export default function Home() {
       <section className="hero">
         <div className="hero-overlay" />
         <div className="container hero-content">
-          <div className="hero-eyebrow hero-animate-in" style={{ animationDelay: '0.2s' }}>
-            <Zap size={14} />
-            <span>Institutional-Grade Investment Platform</span>
-          </div>
           <h1 className="hero-title">
             <span className="hero-line hero-line-1">
               <AnimatedText text="Let's make" delay={0.5} />
