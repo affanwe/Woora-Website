@@ -129,15 +129,6 @@ export default function Home() {
           <p className="hero-subtitle hero-animate-in" style={{ animationDelay: '2.3s' }}>
             Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳500 per share.
           </p>
-          <div className="hero-actions hero-animate-in" style={{ animationDelay: '2.6s' }}>
-            <Link href={currentUser ? '/dashboard' : '/register'} className="btn btn-primary btn-lg hero-btn-glow">
-              <TextShuffle>Get Started</TextShuffle>
-              <ArrowRight size={18} />
-            </Link>
-            <Link href="/projects" className="btn btn-secondary btn-lg">
-              <TextShuffle>View Projects</TextShuffle>
-            </Link>
-          </div>
         </div>
 
         <div className="hero-scroll-indicator hero-animate-in" style={{ animationDelay: '3s' }}>
@@ -294,6 +285,27 @@ export default function Home() {
                 </Link>
               </div>
             </TiltCard>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ======== BOTTOM CTA SECTION ======== */}
+      <section className="section bottom-cta-section text-center" style={{ borderTop: '1px solid var(--border-color)', padding: '100px 0' }}>
+        <div className="container">
+          <ScrollReveal>
+            <h2 className="section-title" style={{ marginBottom: '16px' }}>Ready to Get Started?</h2>
+            <p className="section-subtitle" style={{ marginBottom: '40px', marginLeft: 'auto', marginRight: 'auto' }}>
+              Create an account or explore our active projects to start investing today.
+            </p>
+            <div className="hero-actions">
+              <Link href={currentUser ? '/dashboard' : '/register'} className="btn btn-primary btn-lg hero-btn-glow">
+                <TextShuffle>Get Started</TextShuffle>
+                <ArrowRight size={18} />
+              </Link>
+              <Link href="/projects" className="btn btn-secondary btn-lg">
+                <TextShuffle>View Projects</TextShuffle>
+              </Link>
+            </div>
           </ScrollReveal>
         </div>
       </section>
