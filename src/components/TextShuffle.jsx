@@ -5,18 +5,37 @@ import { useRef, useCallback } from 'react';
 const DURATION = 300; // total scramble duration in ms
 const FRAME_INTERVAL = 30; // ms between visual updates
 
-function randomChar(char) {
+function randomChar(char, originalText) {
   if (!char) return '';
   if (char === ' ') return ' ';
-  if (/[A-Z]/.test(char)) {
+  
+  const isUpper = /[A-Z]/.test(char);
+  const isLower = /[a-z]/.test(char);
+  const isDigit = /[0-9]/.test(char);
+  
+  let candidates = '';
+  if (originalText) {
+    for (let i = 0; i < originalText.length; i++) {
+      const c = originalText[i];
+      if (isUpper && /[A-Z]/.test(c)) candidates += c;
+      else if (isLower && /[a-z]/.test(c)) candidates += c;
+      else if (isDigit && /[0-9]/.test(c)) candidates += c;
+    }
+  }
+  
+  if (candidates.length > 0) {
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+  
+  if (isUpper) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     return chars[Math.floor(Math.random() * chars.length)];
   }
-  if (/[a-z]/.test(char)) {
+  if (isLower) {
     const chars = 'abcdefghijklmnopqrstuvwxyz';
     return chars[Math.floor(Math.random() * chars.length)];
   }
-  if (/[0-9]/.test(char)) {
+  if (isDigit) {
     const chars = '0123456789';
     return chars[Math.floor(Math.random() * chars.length)];
   }
@@ -69,7 +88,7 @@ export default function TextShuffle({
         if (i < settled) {
           result += text[i];
         } else {
-          result += randomChar(text[i]);
+          result += randomChar(text[i], text);
         }
       }
 
