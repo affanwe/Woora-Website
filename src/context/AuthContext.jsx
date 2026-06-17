@@ -7,7 +7,7 @@ import {
   signOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
-import { doc, runTransaction, setDoc, collection, onSnapshot } from 'firebase/firestore';
+import { doc, runTransaction, setDoc, collection, onSnapshot, query, where } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -21,6 +21,17 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [profitData, setProfitData] = useState(null);
+  const [returnPayments, setReturnPayments] = useState([]);
+  const [shareRequests, setShareRequests] = useState([]);
+
+  // DEMO MODE HELPERS
+  const getDemoInvestors = () => JSON.parse(localStorage.getItem('demo_investors') || '[]');
+  const saveDemoInvestors = (data) => localStorage.setItem('demo_investors', JSON.stringify(data));
+  const getDemoRequests = () => JSON.parse(localStorage.getItem('demo_requests') || '[]');
+  const saveDemoRequests = (data) => localStorage.setItem('demo_requests', JSON.stringify(data));
+  const getDemoReturnPayments = () => JSON.parse(localStorage.getItem('demo_returnPayments') || '[]');
+  const saveDemoReturnPayments = (data) => localStorage.setItem('demo_returnPayments', JSON.stringify(data));
 
   // Check if Firebase is configured with real credentials
   useEffect(() => {
@@ -68,14 +79,106 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // DEMO MODE HELPER: Initialize mock data in LocalStorage if not exists
-  const getDemoInvestors = () => JSON.parse(localStorage.getItem('demo_investors') || '[]');
-  const saveDemoInvestors = (data) => localStorage.setItem('demo_investors', JSON.stringify(data));
-  const getDemoRequests = () => JSON.parse(localStorage.getItem('demo_requests') || '[]');
-  const saveDemoRequests = (data) => localStorage.setItem('demo_requests', JSON.stringify(data));
+  // Fetch profit data (returnPayments) for logged-in investor
+  useEffect(() => {
+    if (!userData?.id) {
+      setProfitData(null);
+      setReturnPayments([]);
+      return;
+    }
+
+    if (isDemoMode) {
+      const allPayments = getDemoReturnPayments();
+      const myPayments = allPayments.filter(p => p.investorId === userData.id);
+      myPayments.sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month));
+      setReturnPayments(myPayments);
+
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      const totalProfit = myPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const pendingProfit = myPayments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.amount || 0), 0);
+      const thisMonthPayment = myPayments.find(p => p.month === currentMonth && p.year === currentYear);
+      setProfitData({
+        totalProfit,
+        pendingProfit,
+        thisMonthProfit: thisMonthPayment ? thisMonthPayment.amount : 0,
+      });
+      return;
+    }
+
+    // Firebase: query returnPayments where investorId matches
+    const q = query(
+      collection(db, 'returnPayments'),
+      where('investorId', '==', userData.id)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const payments = [];
+      snapshot.forEach((docSnap) => {
+        payments.push({ docId: docSnap.id, ...docSnap.data() });
+      });
+      payments.sort((a, b) => (b.year * 100 + b.month) - (a.year * 100 + a.month));
+      setReturnPayments(payments);
+
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+      const totalProfit = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const pendingProfit = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.amount || 0), 0);
+      const thisMonthPayment = payments.find(p => p.month === currentMonth && p.year === currentYear);
+      setProfitData({
+        totalProfit,
+        pendingProfit,
+        thisMonthProfit: thisMonthPayment ? thisMonthPayment.amount : 0,
+      });
+    }, (error) => {
+      console.error("Error fetching return payments:", error);
+    });
+
+    return () => unsubscribe();
+  }, [userData?.id, isDemoMode]);
+
+  // Real-time listener for share requests
+  useEffect(() => {
+    if (!userData?.id) {
+      setShareRequests([]);
+      return;
+    }
+
+    if (isDemoMode) {
+      const allRequests = getDemoRequests();
+      const myRequests = allRequests.filter(r => r.investorId === userData.id);
+      myRequests.sort((a, b) => new Date(b.dateRequested) - new Date(a.dateRequested));
+      setShareRequests(myRequests);
+      return;
+    }
+
+    // Firebase: listen to shareRequests for this investor
+    const q = query(
+      collection(db, 'shareRequests'),
+      where('investorId', '==', userData.id)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const requests = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        requests.push({
+          docId: docSnap.id,
+          ...data,
+          dateRequested: data.dateRequested?.toDate ? data.dateRequested.toDate().toISOString() : data.dateRequested,
+        });
+      });
+      requests.sort((a, b) => new Date(b.dateRequested) - new Date(a.dateRequested));
+      setShareRequests(requests);
+    }, (error) => {
+      console.error("Error fetching share requests:", error);
+    });
+
+    return () => unsubscribe();
+  }, [userData?.id, isDemoMode]);
 
   // Sign Up / Register
-  async function register(name, email, mobile, password, nid) {
+  async function register(name, email, mobile, password, nid, referredBy) {
     if (isDemoMode) {
       const investors = getDemoInvestors();
       if (investors.find(inv => inv.email === email)) {
@@ -83,7 +186,7 @@ export function AuthProvider({ children }) {
       }
       const nextId = String(1001 + investors.length);
       const uid = 'demo_uid_' + Math.random().toString(36).substr(2, 9);
-      
+
       const newInvestor = {
         uid,
         id: nextId,
@@ -95,6 +198,7 @@ export function AuthProvider({ children }) {
         amount: 0,
         investments: [],
         awardedFreeShares: 0,
+        referredBy: referredBy || null,
         createdAt: new Date().toISOString()
       };
       
@@ -133,6 +237,7 @@ export function AuthProvider({ children }) {
           amount: 0,
           investments: [],
           awardedFreeShares: 0,
+          referredBy: referredBy || null,
           createdAt: new Date().toISOString()
         });
       });
@@ -193,6 +298,11 @@ export function AuthProvider({ children }) {
       requests.push(newRequest);
       saveDemoRequests(requests);
 
+      // Update shareRequests state immediately
+      const myRequests = requests.filter(r => r.investorId === userData.id);
+      myRequests.sort((a, b) => new Date(b.dateRequested) - new Date(a.dateRequested));
+      setShareRequests(myRequests);
+
       // Add request to local user investments array for instantaneous feedback
       const investors = getDemoInvestors();
       const updatedInvestors = investors.map(inv => {
@@ -249,6 +359,9 @@ export function AuthProvider({ children }) {
     userData,
     loading,
     isDemoMode,
+    profitData,
+    returnPayments,
+    shareRequests,
     login,
     register,
     logout,

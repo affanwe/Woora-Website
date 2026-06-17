@@ -8,20 +8,32 @@ import ScrollReveal from '../../components/ScrollReveal';
 import TiltCard from '../../components/TiltCard';
 import {
   TrendingUp, Award, Clock, DollarSign, CreditCard, Copy, Check,
-  User, Phone, Mail, Hash, FileText, AlertCircle, Plus
+  User, Phone, Mail, Hash, FileText, AlertCircle, Plus,
+  BarChart3, Calendar, ArrowUpRight, Hourglass
 } from 'lucide-react';
 
 export default function Dashboard() {
-  const { userData } = useAuth();
+  const { userData, profitData, returnPayments, shareRequests } = useAuth();
   const [copied, setCopied] = useState(false);
   const [referralLink, setReferralLink] = useState('');
 
   const totalShares = (userData?.shares || 0) + (userData?.awardedFreeShares || 0);
   const investedAmount = (userData?.shares || 0) * 500;
-  const profitReceived = userData?.profitReceived || 0;
+  const totalProfit = profitData?.totalProfit || 0;
+  const pendingProfit = profitData?.pendingProfit || 0;
+  const thisMonthProfit = profitData?.thisMonthProfit || 0;
   const freeShares = userData?.awardedFreeShares || 0;
   const hasActiveInvestment = userData?.investments?.some(inv => inv.status === 'Active');
   const accountStatus = hasActiveInvestment || (userData?.shares || 0) > 0 ? 'Active' : 'Pending';
+
+  // Get last 6 months of profit history
+  const profitHistory = (returnPayments || []).slice(0, 6);
+
+  // Pending share requests
+  const pendingRequests = (shareRequests || []).filter(r => r.status === 'Pending');
+  const recentRequests = (shareRequests || []).slice(0, 5);
+
+  const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -74,8 +86,8 @@ export default function Dashboard() {
             <TiltCard className="metric-tile">
               <div className="metric-tile-inner">
                 <Award size={20} className="metric-icon text-blue" />
-                <span className="metric-val">৳{profitReceived.toLocaleString()}</span>
-                <span className="metric-lbl">Profit Received</span>
+                <span className="metric-val">৳{totalProfit.toLocaleString()}</span>
+                <span className="metric-lbl">Total Profit Earned</span>
               </div>
             </TiltCard>
             <TiltCard className="metric-tile">
@@ -87,6 +99,111 @@ export default function Dashboard() {
             </TiltCard>
           </div>
         </ScrollReveal>
+
+        {/* Profit Section */}
+        <ScrollReveal delay={0.15}>
+          <div className="dash-card glass-panel" style={{ marginBottom: '1.5rem' }}>
+            <div className="dash-card-header">
+              <h3><BarChart3 size={18} /> Profit Overview</h3>
+            </div>
+            <div className="metrics-row" style={{ marginBottom: '1rem' }}>
+              <div className="metric-mini">
+                <ArrowUpRight size={16} className="text-emerald" />
+                <div>
+                  <span className="metric-mini-val">৳{totalProfit.toLocaleString()}</span>
+                  <span className="metric-mini-lbl">Total Earned</span>
+                </div>
+              </div>
+              <div className="metric-mini">
+                <Calendar size={16} className="text-blue" />
+                <div>
+                  <span className="metric-mini-val">৳{thisMonthProfit.toLocaleString()}</span>
+                  <span className="metric-mini-lbl">This Month</span>
+                </div>
+              </div>
+              <div className="metric-mini">
+                <Hourglass size={16} className="text-warning" />
+                <div>
+                  <span className="metric-mini-val">৳{pendingProfit.toLocaleString()}</span>
+                  <span className="metric-mini-lbl">Pending</span>
+                </div>
+              </div>
+            </div>
+            <div className="table-wrap">
+              {profitHistory.length > 0 ? (
+                <table className="inv-table">
+                  <thead>
+                    <tr>
+                      <th>Month</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {profitHistory.map((p, idx) => (
+                      <tr key={idx}>
+                        <td>{monthNames[p.month] || p.month} {p.year}</td>
+                        <td className="fw-700">৳{(p.amount || 0).toLocaleString()}</td>
+                        <td>
+                          <span className={`badge badge-${(p.status || 'paid').toLowerCase()}`}>
+                            {p.status || 'Paid'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="empty-box text-center" style={{ padding: '1.5rem' }}>
+                  <DollarSign size={28} />
+                  <p style={{ margin: '0.5rem 0 0', opacity: 0.7 }}>No profit records yet. Returns are distributed monthly.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </ScrollReveal>
+
+        {/* Share Request Status */}
+        {recentRequests.length > 0 && (
+          <ScrollReveal delay={0.2}>
+            <div className="dash-card glass-panel" style={{ marginBottom: '1.5rem' }}>
+              <div className="dash-card-header">
+                <h3><Clock size={18} /> Share Request Status</h3>
+                {pendingRequests.length > 0 && (
+                  <span className="badge badge-pending">{pendingRequests.length} Pending</span>
+                )}
+              </div>
+              <div className="table-wrap">
+                <table className="inv-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Shares</th>
+                      <th>Amount</th>
+                      <th>Payment</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentRequests.map((req, idx) => (
+                      <tr key={idx}>
+                        <td>{req.dateRequested ? new Date(req.dateRequested).toLocaleDateString() : 'N/A'}</td>
+                        <td className="fw-600">{req.sharesCount}</td>
+                        <td className="fw-700">৳{(req.amount || 0).toLocaleString()}</td>
+                        <td>{req.paymentMethod || 'N/A'}</td>
+                        <td>
+                          <span className={`badge badge-${(req.status || 'pending').toLowerCase()}`}>
+                            {req.status || 'Pending'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
 
         {/* Content Grid */}
         <div className="dash-grid">
@@ -106,6 +223,7 @@ export default function Dashboard() {
                         <th>Amount</th>
                         <th>TrxID</th>
                         <th>Status</th>
+                        <th>Activated</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -120,6 +238,7 @@ export default function Dashboard() {
                               {inv.status || 'Pending'}
                             </span>
                           </td>
+                          <td>{inv.activationDate || (inv.status === 'Active' ? inv.joiningDate : '-')}</td>
                         </tr>
                       ))}
                     </tbody>

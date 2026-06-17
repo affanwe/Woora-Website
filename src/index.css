@@ -230,6 +230,11 @@ a {
   color: var(--danger);
   border: 1px solid rgba(239, 68, 68, 0.15);
 }
+.badge-paid {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
 
 /* ========================================
    Form Controls

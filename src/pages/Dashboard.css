@@ -68,6 +68,30 @@
   color: var(--text-muted);
 }
 
+/* Metric Mini (Profit Overview) */
+.metric-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+.metric-mini svg { flex-shrink: 0; }
+.metric-mini div { display: flex; flex-direction: column; gap: 2px; }
+.metric-mini-val {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+}
+.metric-mini-lbl {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 /* Content Grid */
 .dash-grid {
   display: grid;

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import {
   UserPlus,
@@ -20,6 +20,14 @@ import TextShuffle from '../../components/TextShuffle';
 import ScrollReveal from '../../components/ScrollReveal';
 
 export default function Register() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterInner />
+    </Suspense>
+  );
+}
+
+function RegisterInner() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,9 +39,18 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [referredBy, setReferredBy] = useState('');
 
   const { register, isDemoMode } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      setReferredBy(ref);
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,7 +91,7 @@ export default function Register() {
     try {
       setError('');
       setLoading(true);
-      await register(name, email, cleanMobile, password, cleanNid);
+      await register(name, email, cleanMobile, password, cleanNid, referredBy || null);
       router.push('/dashboard');
     } catch (err) {
       console.error(err);
@@ -116,6 +133,15 @@ export default function Register() {
                   Your data will be securely stored in your browser's local
                   storage. This matches the exact behavior of Firebase Firestore.
                 </p>
+              </div>
+            )}
+
+            {referredBy && (
+              <div className="demo-info-box-3d" style={{ borderColor: 'var(--clr-emerald, #10b981)' }}>
+                <span className="demo-info-title-3d">
+                  <UserPlus size={14} /> Referral Detected
+                </span>
+                <p>You were referred by Investor <strong>#{referredBy}</strong>. Both of you may earn bonus shares!</p>
               </div>
             )}
 

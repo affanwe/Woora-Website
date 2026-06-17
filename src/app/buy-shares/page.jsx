@@ -5,10 +5,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import TextShuffle from '../../components/TextShuffle';
 import ScrollReveal from '../../components/ScrollReveal';
-import { Landmark, ArrowLeft, Copy, Check, Sparkles, ShieldAlert } from 'lucide-react';
+import { Landmark, ArrowLeft, Copy, Check, Sparkles, ShieldAlert, Clock } from 'lucide-react';
 
 export default function BuyShares() {
-  const { requestShares, userData } = useAuth();
+  const { requestShares, userData, shareRequests } = useAuth();
   const [sharesCount, setSharesCount] = useState(10);
   const [paymentMethod, setPaymentMethod] = useState('bKash');
   const [trxId, setTrxId] = useState('');
@@ -183,6 +183,47 @@ export default function BuyShares() {
             </div>
           </ScrollReveal>
         </div>
+
+        {/* Previous Share Requests */}
+        {shareRequests && shareRequests.length > 0 && (
+          <ScrollReveal delay={0.3}>
+            <div className="dash-card glass-panel" style={{ marginTop: '2rem' }}>
+              <div className="dash-card-header">
+                <h3><Clock size={18} /> Previous Requests</h3>
+              </div>
+              <div className="table-wrap">
+                <table className="inv-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Shares</th>
+                      <th>Amount</th>
+                      <th>Method</th>
+                      <th>TrxID</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shareRequests.map((req, idx) => (
+                      <tr key={idx}>
+                        <td>{req.dateRequested ? new Date(req.dateRequested).toLocaleDateString() : 'N/A'}</td>
+                        <td className="fw-600">{req.sharesCount}</td>
+                        <td className="fw-700">৳{(req.amount || 0).toLocaleString()}</td>
+                        <td>{req.paymentMethod || 'N/A'}</td>
+                        <td><code className="trx-code">{req.trxId || 'N/A'}</code></td>
+                        <td>
+                          <span className={`badge badge-${(req.status || 'pending').toLowerCase()}`}>
+                            {req.status || 'Pending'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
       </div>
     </div>
   );
