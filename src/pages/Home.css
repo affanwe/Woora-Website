@@ -71,7 +71,7 @@
 }
 
 .hero-title {
-  font-size: clamp(40px, 7.5vw, 92px);
+  font-size: clamp(32px, 7.5vw, 92px);
   font-weight: 900;
   line-height: 0.95;
   margin-bottom: 32px;
@@ -360,6 +360,8 @@
 }
 
 @media (max-width: 768px) {
+  .featured-item-inner { gap: 16px; padding: 24px 0; }
+  .featured-name { font-size: 22px; }
   .featured-image-preview { display: none; }
   .featured-meta { flex-wrap: wrap; gap: 12px; }
 }

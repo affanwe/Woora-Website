@@ -3,6 +3,8 @@
   padding-top: 60px;
   margin-top: 80px;
   background: var(--bg-surface);
+  position: relative;
+  z-index: 1;
 }
 
 .footer-top {
