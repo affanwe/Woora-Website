@@ -46,6 +46,7 @@ export default function Footer() {
         <div className="footer-legal-links">
           <a href="#privacy"><TextShuffle>Privacy</TextShuffle></a>
           <a href="#terms"><TextShuffle>Terms</TextShuffle></a>
+          <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>Powered by Woora Tech</span>
         </div>
       </div>
     </footer>
