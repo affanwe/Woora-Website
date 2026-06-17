@@ -2,12 +2,25 @@
 
 import { useRef, useCallback } from 'react';
 
-const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
 const DURATION = 300; // total scramble duration in ms
 const FRAME_INTERVAL = 30; // ms between visual updates
 
-function randomChar() {
-  return CHARS[Math.floor(Math.random() * CHARS.length)];
+function randomChar(char) {
+  if (!char) return '';
+  if (char === ' ') return ' ';
+  if (/[A-Z]/.test(char)) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return chars[Math.floor(Math.random() * chars.length)];
+  }
+  if (/[a-z]/.test(char)) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    return chars[Math.floor(Math.random() * chars.length)];
+  }
+  if (/[0-9]/.test(char)) {
+    const chars = '0123456789';
+    return chars[Math.floor(Math.random() * chars.length)];
+  }
+  return char;
 }
 
 export default function TextShuffle({
@@ -53,12 +66,10 @@ export default function TextShuffle({
 
       let result = '';
       for (let i = 0; i < length; i++) {
-        if (text[i] === ' ') {
-          result += ' ';
-        } else if (i < settled) {
+        if (i < settled) {
           result += text[i];
         } else {
-          result += randomChar();
+          result += randomChar(text[i]);
         }
       }
 
