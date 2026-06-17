@@ -33,16 +33,20 @@ export default function TextShuffle({
     function tick(now) {
       const elapsed = now - startTime;
 
+      if (elapsed >= DURATION) {
+        elRef.current.textContent = text;
+        isAnimating.current = false;
+        return;
+      }
+
       // Throttle DOM writes
       if (now - lastFrame < FRAME_INTERVAL) {
-        if (elapsed < DURATION) {
-          requestAnimationFrame(tick);
-        }
+        requestAnimationFrame(tick);
         return;
       }
       lastFrame = now;
 
-      const progress = Math.min(elapsed / DURATION, 1);
+      const progress = elapsed / DURATION;
 
       // Number of characters that have "settled" (left to right reveal)
       const settled = Math.floor(progress * length);
@@ -59,14 +63,7 @@ export default function TextShuffle({
       }
 
       elRef.current.textContent = result;
-
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        // Ensure final state is exact
-        elRef.current.textContent = text;
-        isAnimating.current = false;
-      }
+      requestAnimationFrame(tick);
     }
 
     requestAnimationFrame(tick);
