@@ -65,11 +65,6 @@ export default function Navbar() {
           <Link href="/" className="navbar-logo">
             <span className="logo-mark">W</span>
             <TextShuffle className="logo-text">WOORA</TextShuffle>
-            {isDemoMode && (
-              <span className="nav-demo-badge">
-                <Database size={10} /> DEMO
-              </span>
-            )}
           </Link>
 
           {/* Desktop Nav */}
