@@ -214,55 +214,60 @@ export function AuthProvider({ children }) {
   async function register(name, email, mobile, password, nid, referredBy) {
     try {
       // 1. Check if investor record already exists for this email
-      const { data: existingInvestor, error: checkError } = await supabase
+      const { data: existingInvestor } = await supabase
         .from('investors')
         .select('id, uid')
         .eq('email', email)
         .maybeSingle();
 
-      if (checkError) {
-        console.error("Error checking existing investor:", checkError);
+      if (existingInvestor && existingInvestor.uid) {
+        throw new Error("This email is already registered. Please login instead.");
       }
 
       // 2. Perform Auth Sign Up
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/login` }
       });
 
+      let user = authData?.user;
+
       if (authError) {
-        // If user is already registered in Auth
-        if (authError.message.includes('already registered') || authError.status === 422) {
-          if (existingInvestor) {
+        if (authError.message?.includes('already registered') || authError.status === 422) {
+          // Auth account exists but investor record is missing or has no uid — sign in to get the user
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (signInError) {
             throw new Error("This email is already registered. Please login instead.");
           }
-          // Auth account exists but investor record doesn't (partial failure case).
-          // We will proceed to create the investor record.
+          user = signInData?.user;
         } else {
           throw new Error(authError.message || "Failed to create user account.");
         }
       }
 
-      const user = authData?.user || (await supabase.auth.getUser())?.data?.user;
       if (!user) {
-        throw new Error("Failed to retrieve user session. Please try again.");
+        throw new Error("Failed to retrieve user account. Please try again.");
       }
 
-      // If investor record already exists for this user, we don't need to insert again
-      if (existingInvestor) {
-        console.log("Investor profile already exists, skipping creation.");
+      // 3. If investor record exists without uid, link it to this auth user
+      if (existingInvestor && !existingInvestor.uid) {
+        const { error: linkError } = await supabase
+          .from('investors')
+          .update({ uid: user.id, name, mobile, nid })
+          .eq('id', existingInvestor.id);
+        if (linkError) throw new Error(linkError.message);
         return;
       }
 
-      // 3. Insert investor record with retry logic for unique ID constraint
+      // 4. Create new investor record with sequential ID
       let success = false;
       let retries = 5;
-      let nextId;
       let lastError = null;
 
       while (!success && retries > 0) {
-        // Fetch counters
         const { data: counterData, error: counterError } = await supabase
           .from('metadata')
           .select('value')
@@ -274,14 +279,11 @@ export function AuthProvider({ children }) {
         }
 
         const lastId = counterData?.value?.lastInvestorId || 1000;
-        nextId = lastId + 1;
+        const nextId = lastId + 1;
 
-        // Update counter
         const { error: updateError } = await supabase
           .from('metadata')
-          .update({
-            value: { ...counterData.value, lastInvestorId: nextId }
-          })
+          .update({ value: { ...counterData.value, lastInvestorId: nextId } })
           .eq('key', 'counters');
 
         if (updateError) {
@@ -290,8 +292,7 @@ export function AuthProvider({ children }) {
           continue;
         }
 
-        // Try inserting/upserting investor
-        const { error: investorError } = await supabase.from('investors').upsert({
+        const { error: investorError } = await supabase.from('investors').insert({
           id: String(nextId),
           uid: user.id,
           name,
@@ -302,22 +303,15 @@ export function AuthProvider({ children }) {
           amount: 0,
           awarded_free_shares: 0,
           referred_by: referredBy || null
-        }, { onConflict: 'uid' });
+        });
 
         if (investorError) {
           lastError = investorError;
-          
-          // If it's a unique key violation (PGRST23505 or standard unique constraint)
-          if (investorError.code === '23505' || investorError.message?.includes('duplicate key')) {
-            const isUidConflict = investorError.message?.includes('uid') || investorError.details?.includes('uid');
-            const isEmailConflict = investorError.message?.includes('email') || investorError.details?.includes('email');
-            
-            if (isUidConflict || isEmailConflict) {
-              // The profile already exists, so we are successful
+          if (investorError.code === '23505') {
+            if (investorError.message?.includes('uid') || investorError.message?.includes('email')) {
               success = true;
               break;
             }
-            // Otherwise, it was a conflict on the sequential ID, so retry with a new ID
             retries--;
             continue;
           }
@@ -328,11 +322,11 @@ export function AuthProvider({ children }) {
       }
 
       if (!success) {
-        throw new Error(lastError?.message || "Failed to assign a unique Investor ID due to concurrent registration requests. Please try again.");
+        throw new Error(lastError?.message || "Failed to create investor profile. Please try again.");
       }
     } catch (err) {
-      console.error("Registration error details:", err);
-      throw new Error(err.message || "An unexpected error occurred during registration. Please try again.");
+      console.error("Registration error:", err);
+      throw new Error(err.message || "An unexpected error occurred during registration.");
     }
   }
 
