@@ -27,5 +27,6 @@ dist-ssr
 .next/
 out/
 build/
+.env
 .env*.local
 
