@@ -84,37 +84,16 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
 
 export default function Home() {
   const { currentUser } = useAuth();
-  const [stats, setStats] = useState({ active_investors: 0, total_capital: 0, active_projects: 3 });
+  const [stats, setStats]       = useState({ active_investors: 0, total_capital: 0, active_projects: 0 });
+  const [featuredProjects, setFeaturedProjects] = useState([]);
 
   useEffect(() => {
     supabase.rpc('get_public_stats').then(({ data }) => {
       if (data) setStats(data);
     });
+    supabase.from('projects').select('id,name,category,tagline,images,status').order('created_at', { ascending: false }).limit(3)
+      .then(({ data }) => { if (data) setFeaturedProjects(data); });
   }, []);
-
-  const projects = [
-    {
-      name: 'WOORA Heights',
-      category: 'Real Estate',
-      image: '/images/real_estate.png',
-      roi: '15%',
-      funded: 72,
-    },
-    {
-      name: 'WOORA Green Agro-Tech',
-      category: 'Agriculture',
-      image: '/images/agro_tech.png',
-      roi: '18%',
-      funded: 48,
-    },
-    {
-      name: 'WOORA Smart Logistics',
-      category: 'Infrastructure',
-      image: '/images/logistics.png',
-      roi: '16%',
-      funded: 89,
-    },
-  ];
 
   return (
     <div className="home-page">
@@ -189,34 +168,38 @@ export default function Home() {
             <h2 className="section-title">Featured Projects</h2>
           </ScrollReveal>
 
-          <div className="featured-list">
-            {projects.map((project, i) => (
-              <ScrollReveal key={i} delay={i * 0.1}>
-                <Link
-                  href={currentUser ? '/buy-shares' : '/login'}
-                  className="featured-item"
-                >
-                  <div className="featured-item-inner">
-                    <span className="featured-index">0{i + 1}</span>
-                    <div className="featured-text">
-                      <h3 className="featured-name">
-                        <TextShuffle>{project.name}</TextShuffle>
-                      </h3>
-                      <div className="featured-meta">
-                        <span className="featured-category">{project.category}</span>
-                        <span className="featured-roi">ROI {project.roi} p.a.</span>
-                        <span className="featured-funded">{project.funded}% Funded</span>
+          {featuredProjects.length > 0 ? (
+            <div className="featured-list">
+              {featuredProjects.map((project, i) => (
+                <ScrollReveal key={project.id} delay={i * 0.1}>
+                  <Link href={`/projects/${project.id}`} className="featured-item">
+                    <div className="featured-item-inner">
+                      <span className="featured-index">0{i + 1}</span>
+                      <div className="featured-text">
+                        <h3 className="featured-name">
+                          <TextShuffle>{project.name}</TextShuffle>
+                        </h3>
+                        <div className="featured-meta">
+                          <span className="featured-category">{project.category}</span>
+                          <span className="featured-category">{project.status}</span>
+                        </div>
                       </div>
+                      {project.images && project.images[0] && (
+                        <div className="featured-image-preview">
+                          <img src={project.images[0]} alt={project.name} />
+                        </div>
+                      )}
+                      <ArrowRight size={20} className="featured-arrow" />
                     </div>
-                    <div className="featured-image-preview">
-                      <img src={project.image} alt={project.name} />
-                    </div>
-                    <ArrowRight size={20} className="featured-arrow" />
-                  </div>
-                </Link>
-              </ScrollReveal>
-            ))}
-          </div>
+                  </Link>
+                </ScrollReveal>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)', opacity: 0.6 }}>
+              Projects coming soon.
+            </div>
+          )}
 
           <ScrollReveal>
             <div className="text-center" style={{ marginTop: '48px' }}>
