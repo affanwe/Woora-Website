@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Eye,
@@ -16,13 +16,21 @@ import {
   ArrowRight
 } from 'lucide-react';
 import ScrollReveal from '../../components/ScrollReveal';
+import { supabase } from '../../lib/supabase';
 
-const stats = [
-  { icon: CalendarDays, label: 'Founded', value: '2023', color: 'emerald' },
-  { icon: Users,        label: 'Investors', value: '15K+', color: 'gold' },
-  { icon: Wallet,       label: 'Invested', value: '৳2.5B+', color: 'blue' },
-  { icon: FolderKanban, label: 'Projects', value: '12+', color: 'emerald' },
-];
+function formatCapital(amount) {
+  if (amount <= 0) return '৳0';
+  if (amount >= 10_000_000_000) return `৳${(amount / 10_000_000_000).toFixed(1)}B+`;
+  if (amount >= 10_000_000)     return `৳${(amount / 10_000_000).toFixed(1)}Cr+`;
+  if (amount >= 100_000)        return `৳${(amount / 100_000).toFixed(1)}L+`;
+  return `৳${amount.toLocaleString()}`;
+}
+
+function formatInvestors(count) {
+  if (count <= 0) return '0';
+  if (count >= 1000) return `${(count / 1000).toFixed(0)}K+`;
+  return `${count}+`;
+}
 
 const values = [
   {
@@ -52,6 +60,25 @@ const values = [
 ];
 
 export default function About() {
+  const [statsData, setStatsData] = useState({ active_investors: 0, total_capital: 0, active_projects: 3 });
+
+  useEffect(() => {
+    supabase.rpc('get_public_stats').then(({ data }) => {
+      if (data) setStatsData(data);
+    });
+  }, []);
+
+  const stats = [
+    { icon: CalendarDays, label: 'Founded',   value: '2026',                                    color: 'emerald' },
+    { icon: Users,        label: 'Investors',  value: formatInvestors(statsData.active_investors), color: 'gold'    },
+    { icon: Wallet,       label: 'Invested',   value: formatCapital(statsData.total_capital),     color: 'blue'    },
+    { icon: FolderKanban, label: 'Projects',   value: `${statsData.active_projects}+`,            color: 'emerald' },
+  ];
+
+  const investorLabel = statsData.active_investors > 0
+    ? `Join ${formatInvestors(statsData.active_investors)} investors already building wealth with WOORA Group.`
+    : 'Be among the first to build wealth with WOORA Group.';
+
   return (
     <div className="about-page">
 
@@ -99,7 +126,7 @@ export default function About() {
                   We believe that wealth creation shouldn't be reserved for the
                   privileged few. By fractionalizing ownership of premium assets into
                   affordable shares starting at just ৳500, we've opened the doors
-                  for thousands of Bangladeshi citizens to participate in
+                  for Bangladeshi citizens to participate in
                   institutional-quality investments that were previously inaccessible.
                 </p>
                 <p className="about-story__paragraph">
@@ -137,7 +164,6 @@ export default function About() {
         <div className="container">
           <ScrollReveal direction="up" delay={0.1}>
             <div className="about-mv__grid">
-              {/* Mission Card */}
               <div className="about-mv-card">
                 <div className="about-mv-card__icon-wrap about-mv-card__icon--emerald">
                   <Target size={24} />
@@ -152,7 +178,6 @@ export default function About() {
                 </p>
               </div>
 
-              {/* Vision Card */}
               <div className="about-mv-card">
                 <div className="about-mv-card__icon-wrap about-mv-card__icon--gold">
                   <Eye size={24} />
@@ -213,9 +238,7 @@ export default function About() {
                 Ready to Start Your<br />
                 <span className="gradient-text">Investment Journey?</span>
               </h2>
-              <p className="about-cta__subtitle">
-                Join 15,000+ investors already building wealth with WOORA Group.
-              </p>
+              <p className="about-cta__subtitle">{investorLabel}</p>
               <div className="about-cta__actions">
                 <Link href="/register" className="btn btn-primary">
                   Get Started <ArrowRight size={16} />
