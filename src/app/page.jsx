@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import TextShuffle from '../components/TextShuffle';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
+import { supabase } from '../lib/supabase';
 import { ArrowRight, TrendingUp, Users, Wallet, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
 
 // Animated character reveal — each character appears one at a time, wrapping at word boundaries
@@ -83,6 +84,13 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
 
 export default function Home() {
   const { currentUser } = useAuth();
+  const [stats, setStats] = useState({ active_investors: 0, total_capital: 0, active_projects: 3 });
+
+  useEffect(() => {
+    supabase.rpc('get_public_stats').then(({ data }) => {
+      if (data) setStats(data);
+    });
+  }, []);
 
   const projects = [
     {
@@ -139,22 +147,33 @@ export default function Home() {
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-icon"><Wallet size={24} /></div>
-                <div className="stat-value"><AnimatedCounter target={250} prefix="৳" suffix="Cr+" /></div>
+                <div className="stat-value">
+                  <AnimatedCounter
+                    key={stats.total_capital}
+                    target={Math.round(stats.total_capital / 10000000)}
+                    prefix="৳"
+                    suffix={stats.total_capital >= 10000000 ? "Cr+" : ""}
+                  />
+                </div>
                 <div className="stat-label">Total Capital Deployed</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon text-gold"><Users size={24} /></div>
-                <div className="stat-value"><AnimatedCounter target={15000} suffix="+" /></div>
+                <div className="stat-value">
+                  <AnimatedCounter key={stats.active_investors} target={stats.active_investors} suffix="+" />
+                </div>
                 <div className="stat-label">Active Investors</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon text-blue"><TrendingUp size={24} /></div>
-                <div className="stat-value"><AnimatedCounter target={16} suffix="%" /></div>
+                <div className="stat-value"><AnimatedCounter target={25} suffix="%" /></div>
                 <div className="stat-label">Average Annual ROI</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon text-purple"><BarChart3 size={24} /></div>
-                <div className="stat-value"><AnimatedCounter target={12} suffix="+" /></div>
+                <div className="stat-value">
+                  <AnimatedCounter key={stats.active_projects} target={Number(stats.active_projects)} suffix="+" />
+                </div>
                 <div className="stat-label">Active Projects</div>
               </div>
             </div>
