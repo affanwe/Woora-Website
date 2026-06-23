@@ -301,7 +301,7 @@ export function AuthProvider({ children }) {
       address: address.trim(),
       guardian_mobile: guardianMobile.trim(),
       is_activated: true,
-      status: 'Pending',
+      status: 'Active',
       updated_at: new Date().toISOString()
     }).eq('id', userData.id);
     if (error) throw error;

@@ -7,20 +7,27 @@ import { User, CreditCard, Phone, MapPin, Upload, CheckCircle, ArrowRight } from
 import ScrollReveal from '../../components/ScrollReveal';
 
 const compressImage = (file) => new Promise((resolve, reject) => {
-  if (file.size > 10 * 1024 * 1024) { reject(new Error('File too large. Max 10MB.')); return; }
+  if (file.size > 3 * 1024 * 1024) { reject(new Error('File too large. Maximum 3MB allowed.')); return; }
   const reader = new FileReader();
   reader.onloadend = () => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
       let { width, height } = img;
-      const MAX = 800;
+      const MAX = 600;
       if (width > height && width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
       else if (height > MAX) { width = Math.round(width * MAX / height); height = MAX; }
       canvas.width = width;
       canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.7));
+      // Start at 60% quality, reduce further if still too large
+      let quality = 0.6;
+      let result = canvas.toDataURL('image/jpeg', quality);
+      while (result.length > 200 * 1024 && quality > 0.2) {
+        quality -= 0.1;
+        result = canvas.toDataURL('image/jpeg', quality);
+      }
+      resolve(result);
     };
     img.onerror = reject;
     img.src = reader.result;
@@ -59,8 +66,8 @@ export default function Activate() {
     e.preventDefault();
     if (!form.name.trim()) return setError('Full name is required.');
     const cleanNid = form.nid.trim();
-    if (!cleanNid || !/^\d+$/.test(cleanNid) || (cleanNid.length !== 10 && cleanNid.length !== 13 && cleanNid.length !== 17))
-      return setError('Please enter a valid NID (10, 13, or 17 digits).');
+    if (!cleanNid || !/^\d+$/.test(cleanNid))
+      return setError('NID / Birth Certificate must contain digits only.');
     if (!form.guardianMobile.trim()) return setError('Guardian mobile is required.');
 
     try {
@@ -126,7 +133,7 @@ export default function Activate() {
                       : <Upload size={22} color="var(--color-text-muted)" />}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                    <div>Max 10MB — auto-compressed to 800px</div>
+                    <div>Max 3MB — auto-compressed before saving</div>
                     <div>JPEG, PNG accepted</div>
                     <button type="button" onClick={() => fileRef.current.click()}
                       style={{ marginTop: '6px', background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'var(--color-text-muted)', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}>
@@ -153,7 +160,7 @@ export default function Activate() {
                   <label className="form-label-3d" htmlFor="act-nid">NID / Birth Cert. *</label>
                   <div className="input-icon-wrapper-3d">
                     <CreditCard className="input-icon-3d" size={18} />
-                    <input id="act-nid" type="text" className="form-control-3d" placeholder="10, 13 or 17 digits"
+                    <input id="act-nid" type="text" className="form-control-3d" placeholder="NID or Birth Certificate number"
                       value={form.nid} onChange={e => setForm(p => ({ ...p, nid: e.target.value }))} required />
                   </div>
                 </div>
