@@ -60,12 +60,16 @@ export function AuthProvider({ children }) {
     email: row.email,
     mobile: row.mobile,
     nid: row.nid,
+    address: row.address,
+    guardianMobile: row.guardian_mobile,
+    image: row.image,
     shares: row.shares,
     amount: row.amount,
     investments: [],
     awardedFreeShares: row.awarded_free_shares,
     referredBy: row.referred_by,
     status: row.status,
+    isActivated: row.is_activated || false,
     createdAt: row.created_at
   });
 
@@ -210,10 +214,9 @@ export function AuthProvider({ children }) {
     return () => supabase.removeChannel(channel);
   }, [userData?.id]);
 
-  // Sign Up / Register
-  async function register(name, email, mobile, password, nid, referredBy) {
+  // Sign Up / Register — simplified: email + mobile + password only
+  async function register(email, mobile, password, referredBy) {
     try {
-      // 1. Check if investor record already exists for this email
       const { data: existingInvestor } = await supabase
         .from('investors')
         .select('id, uid')
@@ -224,110 +227,85 @@ export function AuthProvider({ children }) {
         throw new Error("This email is already registered. Please login instead.");
       }
 
-      // 2. Perform Auth Sign Up
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
+      const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
       let user = authData?.user;
 
       if (authError) {
         if (authError.message?.includes('already registered') || authError.status === 422) {
-          // Auth account exists but investor record is missing or has no uid — sign in to get the user
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-          if (signInError) {
-            throw new Error("This email is already registered. Please login instead.");
-          }
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) throw new Error("This email is already registered. Please login instead.");
           user = signInData?.user;
         } else {
           throw new Error(authError.message || "Failed to create user account.");
         }
       }
 
-      if (!user) {
-        throw new Error("Failed to retrieve user account. Please try again.");
-      }
+      if (!user) throw new Error("Failed to retrieve user account. Please try again.");
 
-      // 3. If investor record exists without uid, link it to this auth user
+      // Link existing record if uid-less
       if (existingInvestor && !existingInvestor.uid) {
-        const { error: linkError } = await supabase
-          .from('investors')
-          .update({ uid: user.id, name, mobile, nid })
-          .eq('id', existingInvestor.id);
-        if (linkError) throw new Error(linkError.message);
+        await supabase.from('investors').update({ uid: user.id, mobile, is_activated: false }).eq('id', existingInvestor.id);
         return;
       }
 
-      // 4. Create new investor record with sequential ID
-      let success = false;
-      let retries = 5;
-      let lastError = null;
-
+      // Create new investor with sequential ID
+      let success = false, retries = 5, lastError = null;
       while (!success && retries > 0) {
-        const { data: counterData, error: counterError } = await supabase
-          .from('metadata')
-          .select('value')
-          .eq('key', 'counters')
-          .single();
-
-        if (counterError) {
-          throw new Error("Failed to read server configuration. Please try again.");
-        }
+        const { data: counterData, error: counterError } = await supabase.from('metadata').select('value').eq('key', 'counters').single();
+        if (counterError) throw new Error("Failed to read server configuration.");
 
         const lastId = counterData?.value?.lastInvestorId || 1000;
         const nextId = lastId + 1;
 
-        const { error: updateError } = await supabase
-          .from('metadata')
-          .update({ value: { ...counterData.value, lastInvestorId: nextId } })
-          .eq('key', 'counters');
-
-        if (updateError) {
-          retries--;
-          lastError = updateError;
-          continue;
-        }
+        const { error: updateError } = await supabase.from('metadata').update({ value: { ...counterData.value, lastInvestorId: nextId } }).eq('key', 'counters');
+        if (updateError) { retries--; lastError = updateError; continue; }
 
         const { error: investorError } = await supabase.from('investors').insert({
           id: String(nextId),
           uid: user.id,
-          name,
+          name: null,
           email,
           mobile,
-          nid,
           shares: 0,
           amount: 0,
           awarded_free_shares: 0,
+          is_activated: false,
           referred_by: referredBy || null
         });
 
         if (investorError) {
           lastError = investorError;
           if (investorError.code === '23505') {
-            if (investorError.message?.includes('uid') || investorError.message?.includes('email')) {
-              success = true;
-              break;
-            }
+            if (investorError.message?.includes('uid') || investorError.message?.includes('email')) { success = true; break; }
             retries--;
             continue;
           }
           throw investorError;
         }
-
         success = true;
       }
-
-      if (!success) {
-        throw new Error(lastError?.message || "Failed to create investor profile. Please try again.");
-      }
+      if (!success) throw new Error(lastError?.message || "Failed to create investor profile.");
     } catch (err) {
       console.error("Registration error:", err);
-      throw new Error(err.message || "An unexpected error occurred during registration.");
+      throw new Error(err.message || "An unexpected error occurred.");
     }
+  }
+
+  // Activate account — fill profile details
+  async function activateAccount({ name, nid, image, address, guardianMobile }) {
+    if (!currentUser || !userData) throw new Error("Must be logged in.");
+    const { error } = await supabase.from('investors').update({
+      name: name.trim(),
+      nid: nid.trim(),
+      image: image || null,
+      address: address.trim(),
+      guardian_mobile: guardianMobile.trim(),
+      is_activated: true,
+      status: 'Pending',
+      updated_at: new Date().toISOString()
+    }).eq('id', userData.id);
+    if (error) throw error;
+    setUserData(prev => prev ? { ...prev, name: name.trim(), nid: nid.trim(), image, address: address.trim(), guardianMobile: guardianMobile.trim(), isActivated: true } : prev);
   }
 
   // Login
@@ -375,7 +353,8 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
-    requestShares
+    requestShares,
+    activateAccount
   };
 
   return (

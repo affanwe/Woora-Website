@@ -35,7 +35,7 @@ export default function BuyShares() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (sharesCount <= 0) return setError('Enter a valid number of shares.');
+    if (sharesCount <= 0) return setError('Enter a valid number of investment units.');
     if (!trxId.trim()) return setError('Enter the Transaction ID or Reference.');
     try {
       setLoading(true);
@@ -57,13 +57,13 @@ export default function BuyShares() {
               <div className="success-glow"><Sparkles size={32} /></div>
               <h2>Request Submitted!</h2>
               <p className="success-msg">
-                Your request to purchase <strong>{sharesCount} shares</strong> (৳{amount.toLocaleString()}) via <strong>{paymentMethod}</strong> has been submitted.
+                Your request to purchase <strong>{sharesCount} investment units</strong> (৳{amount.toLocaleString()}) via <strong>{paymentMethod}</strong> has been submitted.
               </p>
               <div className="success-detail">
                 <p><strong>TrxID:</strong> <code>{trxId}</code></p>
                 <p><strong>Status:</strong> <span className="badge badge-pending">Pending Review</span></p>
               </div>
-              <p className="success-note">Our team will verify and activate your shares within 1–4 business hours.</p>
+              <p className="success-note">Our team will verify and activate your investment units within 1–4 business hours.</p>
               <div className="success-btns">
                 <button className="btn btn-primary" onClick={() => router.push('/dashboard')}>
                   <TextShuffle>Go to Dashboard</TextShuffle>
@@ -91,7 +91,7 @@ export default function BuyShares() {
             <div className="buy-form-card glass-panel">
               <div className="buy-form-header">
                 <div className="buy-icon-box"><Landmark size={24} /></div>
-                <h2>Request Share Purchase</h2>
+                <h2>Buy Investment Units</h2>
                 <p>Complete payment, then submit transaction details.</p>
               </div>
 
@@ -99,7 +99,7 @@ export default function BuyShares() {
 
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Number of Shares (৳500 / Share)</label>
+                  <label className="form-label">Number of Investment Units (৳500 / Unit)</label>
                   <input type="number" min="1" className="form-control" value={sharesCount}
                     onChange={(e) => setSharesCount(Math.max(1, parseInt(e.target.value) || 0))} required />
                 </div>
@@ -125,8 +125,8 @@ export default function BuyShares() {
                 </div>
 
                 <div className="price-summary glass-panel">
-                  <div className="price-row"><span>Shares</span><span>{sharesCount}</span></div>
-                  <div className="price-row"><span>Price/Share</span><span>৳500</span></div>
+                  <div className="price-row"><span>Investment Units</span><span>{sharesCount}</span></div>
+                  <div className="price-row"><span>Price/Unit</span><span>৳500</span></div>
                   <div className="price-row price-total"><span>Total</span><span>৳{amount.toLocaleString()}</span></div>
                 </div>
 
@@ -184,19 +184,19 @@ export default function BuyShares() {
           </ScrollReveal>
         </div>
 
-        {/* Previous Share Requests */}
+        {/* Previous Requests */}
         {shareRequests && shareRequests.length > 0 && (
           <ScrollReveal delay={0.3}>
             <div className="dash-card glass-panel" style={{ marginTop: '2rem' }}>
               <div className="dash-card-header">
-                <h3><Clock size={18} /> Previous Requests</h3>
+                <h3><Clock size={18} /> Previous Investment Unit Requests</h3>
               </div>
               <div className="table-wrap">
                 <table className="inv-table">
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Shares</th>
+                      <th>Units</th>
                       <th>Amount</th>
                       <th>Method</th>
                       <th>TrxID</th>

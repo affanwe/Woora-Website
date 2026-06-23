@@ -9,7 +9,7 @@ import TiltCard from '../../components/TiltCard';
 import {
   TrendingUp, Award, Clock, DollarSign, CreditCard, Copy, Check,
   User, Phone, Mail, Hash, FileText, AlertCircle, Plus,
-  BarChart3, Calendar, ArrowUpRight, Hourglass
+  BarChart3, Calendar, ArrowUpRight, Hourglass, ShieldCheck, ArrowRight
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -17,19 +17,16 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [referralLink, setReferralLink] = useState('');
 
-  const totalShares = (userData?.shares || 0) + (userData?.awardedFreeShares || 0);
+  const totalUnits = (userData?.shares || 0) + (userData?.awardedFreeShares || 0);
   const investedAmount = (userData?.shares || 0) * 500;
   const totalProfit = profitData?.totalProfit || 0;
   const pendingProfit = profitData?.pendingProfit || 0;
   const thisMonthProfit = profitData?.thisMonthProfit || 0;
-  const freeShares = userData?.awardedFreeShares || 0;
+  const freeUnits = userData?.awardedFreeShares || 0;
   const hasActiveInvestment = userData?.investments?.some(inv => inv.status === 'Active');
   const accountStatus = hasActiveInvestment || (userData?.shares || 0) > 0 ? 'Active' : 'Pending';
 
-  // Get last 6 months of profit history
   const profitHistory = (returnPayments || []).slice(0, 6);
-
-  // Pending share requests
   const pendingRequests = (shareRequests || []).filter(r => r.status === 'Pending');
   const recentRequests = (shareRequests || []).slice(0, 5);
 
@@ -49,9 +46,79 @@ export default function Dashboard() {
     }
   };
 
+  // Non-activated users see activation CTA
+  if (userData && !userData.isActivated) {
+    return (
+      <div className="dashboard-page">
+        <div className="container" style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '60px 20px' }}>
+          <ScrollReveal direction="up">
+            <div style={{
+              background: 'var(--color-surface)',
+              border: '1px solid rgba(16,185,129,0.25)',
+              borderRadius: '20px',
+              padding: '48px 40px',
+              maxWidth: '520px',
+              width: '100%',
+              boxShadow: '0 0 60px rgba(16,185,129,0.08)'
+            }}>
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '50%',
+                background: 'linear-gradient(135deg,#10b981,#059669)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 24px',
+                boxShadow: '0 0 30px rgba(16,185,129,0.3)'
+              }}>
+                <ShieldCheck size={32} color="#fff" />
+              </div>
+
+              <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '12px' }}>
+                Welcome, <span className="gradient-text">{userData.email}</span>
+              </h2>
+              <p style={{ color: 'var(--color-text-muted)', marginBottom: '8px', lineHeight: 1.6 }}>
+                Your account has been created with Investor ID <strong style={{ color: 'var(--color-primary)' }}>#{userData.id}</strong>.
+              </p>
+              <p style={{ color: 'var(--color-text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>
+                To become an Investment Partner and access your dashboard, you need to complete your profile with your name, NID and photo.
+              </p>
+
+              {/* Step indicators */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#10b981' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>✓</div>
+                  <span>Account Created</span>
+                </div>
+                <div style={{ flex: 1, height: '2px', background: 'linear-gradient(90deg,#10b981,var(--color-primary))', borderRadius: '2px', maxWidth: '60px' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--color-primary)' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--color-primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>2</div>
+                  <span>Complete Profile</span>
+                </div>
+              </div>
+
+              <Link href="/activate" style={{
+                display: 'inline-flex', alignItems: 'center', gap: '10px',
+                background: 'linear-gradient(135deg,#10b981,#059669)',
+                color: '#fff', fontWeight: 700, fontSize: '1rem',
+                padding: '14px 32px', borderRadius: '12px',
+                textDecoration: 'none', transition: 'opacity 0.2s',
+                boxShadow: '0 4px 20px rgba(16,185,129,0.3)'
+              }}>
+                <ShieldCheck size={20} />
+                Activate Your Account
+                <ArrowRight size={18} />
+              </Link>
+
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '20px' }}>
+                Takes less than 2 minutes · Required to start investing
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-page">
-
       <div className="container dashboard-content">
         {/* Header */}
         <ScrollReveal>
@@ -61,7 +128,7 @@ export default function Dashboard() {
               <p className="dash-sub">Your investment overview and portfolio tracker.</p>
             </div>
             <Link href="/buy-shares" className="btn btn-primary">
-              <Plus size={16} /> <TextShuffle>Buy Shares</TextShuffle>
+              <Plus size={16} /> <TextShuffle>Buy Investment Units</TextShuffle>
             </Link>
           </header>
         </ScrollReveal>
@@ -72,8 +139,8 @@ export default function Dashboard() {
             <TiltCard className="metric-tile">
               <div className="metric-tile-inner">
                 <TrendingUp size={20} className="metric-icon text-emerald" />
-                <span className="metric-val">{totalShares}</span>
-                <span className="metric-lbl">Total Shares</span>
+                <span className="metric-val">{totalUnits}</span>
+                <span className="metric-lbl">Total Investment Units</span>
               </div>
             </TiltCard>
             <TiltCard className="metric-tile">
@@ -163,12 +230,12 @@ export default function Dashboard() {
           </div>
         </ScrollReveal>
 
-        {/* Share Request Status */}
+        {/* Investment Unit Request Status */}
         {recentRequests.length > 0 && (
           <ScrollReveal delay={0.2}>
             <div className="dash-card glass-panel" style={{ marginBottom: '1.5rem' }}>
               <div className="dash-card-header">
-                <h3><Clock size={18} /> Share Request Status</h3>
+                <h3><Clock size={18} /> Investment Unit Request Status</h3>
                 {pendingRequests.length > 0 && (
                   <span className="badge badge-pending">{pendingRequests.length} Pending</span>
                 )}
@@ -178,7 +245,7 @@ export default function Dashboard() {
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Shares</th>
+                      <th>Units</th>
                       <th>Amount</th>
                       <th>Payment</th>
                       <th>Status</th>
@@ -219,7 +286,7 @@ export default function Dashboard() {
                     <thead>
                       <tr>
                         <th>Date</th>
-                        <th>Shares</th>
+                        <th>Units</th>
                         <th>Amount</th>
                         <th>TrxID</th>
                         <th>Status</th>
@@ -247,8 +314,8 @@ export default function Dashboard() {
                   <div className="empty-box text-center">
                     <AlertCircle size={36} />
                     <h4>No Investments Yet</h4>
-                    <p>Submit your first share purchase request to get started.</p>
-                    <Link href="/buy-shares" className="btn btn-secondary">Buy Shares</Link>
+                    <p>Submit your first investment unit purchase request to get started.</p>
+                    <Link href="/buy-shares" className="btn btn-secondary">Buy Investment Units</Link>
                   </div>
                 )}
               </div>
@@ -295,8 +362,8 @@ export default function Dashboard() {
                     <span className="ref-label">Referred</span>
                   </div>
                   <div className="ref-stat-box">
-                    <span className="ref-num">{freeShares}</span>
-                    <span className="ref-label">Free Shares</span>
+                    <span className="ref-num">{freeUnits}</span>
+                    <span className="ref-label">Free Units</span>
                   </div>
                 </div>
                 <div className="ref-link-row">
