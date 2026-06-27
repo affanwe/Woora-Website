@@ -342,6 +342,29 @@ export function AuthProvider({ children }) {
     return newRequest;
   }
 
+  // Create sell request
+  async function requestSellShares(sharesCount) {
+    if (!currentUser || !userData) throw new Error("Must be logged in.");
+    if (sharesCount <= 0) throw new Error("Please enter a valid number of shares.");
+    if (sharesCount > (userData.shares || 0)) throw new Error("You don't have enough shares to sell.");
+
+    const amount = sharesCount * 500;
+
+    const { data: newRequest, error } = await supabase.from('share_requests').insert({
+      investor_id: userData.id,
+      investor_name: userData.name,
+      shares_count: sharesCount,
+      amount,
+      payment_method: 'N/A',
+      trx_id: '',
+      status: 'Pending',
+      request_type: 'SELL'
+    }).select().single();
+    if (error) throw error;
+
+    return newRequest;
+  }
+
   const value = {
     currentUser,
     userData,
@@ -354,6 +377,7 @@ export function AuthProvider({ children }) {
     register,
     logout,
     requestShares,
+    requestSellShares,
     activateAccount
   };
 

@@ -8,17 +8,22 @@ import ScrollReveal from '../../components/ScrollReveal';
 import TiltCard from '../../components/TiltCard';
 import {
   TrendingUp, Award, Clock, DollarSign, CreditCard, Copy, Check,
-  User, Phone, Mail, Hash, FileText, AlertCircle, Plus,
-  BarChart3, Calendar, ArrowUpRight, Hourglass, ShieldCheck, ArrowRight
+  User, Phone, Mail, Hash, FileText, AlertCircle, Plus, Minus,
+  BarChart3, Calendar, ArrowUpRight, Hourglass, ShieldCheck, ArrowRight, X
 } from 'lucide-react';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 export default function Dashboard() {
-  const { userData, profitData, returnPayments, shareRequests } = useAuth();
+  const { userData, profitData, returnPayments, shareRequests, requestSellShares } = useAuth();
   const { home: homeSettings } = useSiteSettings();
   const sharePrice = homeSettings?.sharePrice || 500;
   const [copied, setCopied] = useState(false);
   const [referralLink, setReferralLink] = useState('');
+  const [showSellModal, setShowSellModal] = useState(false);
+  const [sellUnits, setSellUnits] = useState(1);
+  const [sellLoading, setSellLoading] = useState(false);
+  const [sellError, setSellError] = useState('');
+  const [sellSuccess, setSellSuccess] = useState('');
 
   const totalUnits = (userData?.shares || 0) + (userData?.awardedFreeShares || 0);
   const investedAmount = (userData?.shares || 0) * sharePrice;
@@ -46,6 +51,25 @@ export default function Dashboard() {
       navigator.clipboard.writeText(referralLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSellRequest = async () => {
+    if (sellUnits <= 0 || sellUnits > (userData?.shares || 0)) {
+      setSellError('Invalid number of units.');
+      return;
+    }
+    try {
+      setSellError('');
+      setSellLoading(true);
+      await requestSellShares(sellUnits);
+      setSellSuccess('Sell request submitted! Admin will review it shortly.');
+      setSellUnits(1);
+      setTimeout(() => { setShowSellModal(false); setSellSuccess(''); }, 3000);
+    } catch (err) {
+      setSellError(err.message || 'Failed to submit sell request.');
+    } finally {
+      setSellLoading(false);
     }
   };
 
@@ -130,9 +154,16 @@ export default function Dashboard() {
               <h1>Welcome, <span className="gradient-text">{userData?.name || 'Investor'}</span></h1>
               <p className="dash-sub">Your investment overview and portfolio tracker.</p>
             </div>
-            <Link href="/buy-shares" className="btn btn-primary">
-              <Plus size={16} /> <SplitHoverText>Buy Investment Units</SplitHoverText>
-            </Link>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <Link href="/buy-shares" className="btn btn-primary">
+                <Plus size={16} /> <SplitHoverText>Buy Investment Units</SplitHoverText>
+              </Link>
+              {(userData?.shares || 0) > 0 && (
+                <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary" style={{ borderColor: '#EF4444', color: '#EF4444' }}>
+                  <Minus size={16} /> <SplitHoverText>Sell Units</SplitHoverText>
+                </button>
+              )}
+            </div>
           </header>
         </ScrollReveal>
 
@@ -379,6 +410,45 @@ export default function Dashboard() {
             </ScrollReveal>
           </div>
         </div>
+
+        {/* Sell Modal */}
+        {showSellModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+            <div style={{ background: 'var(--color-surface, #1a1a2e)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '16px', padding: '32px', maxWidth: '420px', width: '100%', position: 'relative' }}>
+              <button onClick={() => setShowSellModal(false)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: 'var(--color-text-muted, #888)', cursor: 'pointer' }}>
+                <X size={20} />
+              </button>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '8px', color: '#EF4444' }}>Sell Investment Units</h3>
+              <p style={{ color: 'var(--color-text-muted, #aaa)', fontSize: '14px', marginBottom: '20px' }}>
+                Your request will be reviewed by the admin team.
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #aaa)', marginBottom: '16px' }}>
+                Available units: <strong style={{ color: '#fff' }}>{userData?.shares || 0}</strong>
+              </p>
+              {sellError && <div style={{ background: 'rgba(239,68,68,0.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', fontSize: '13px' }}>{sellError}</div>}
+              {sellSuccess && <div style={{ background: 'rgba(0,208,156,0.12)', color: '#00D09C', border: '1px solid rgba(0,208,156,0.2)', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', fontSize: '13px' }}>{sellSuccess}</div>}
+              <label style={{ display: 'block', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted, #888)', marginBottom: '6px' }}>Number of units to sell</label>
+              <input
+                type="number"
+                min="1"
+                max={userData?.shares || 0}
+                value={sellUnits}
+                onChange={e => setSellUnits(parseInt(e.target.value) || 0)}
+                className="form-control"
+                style={{ width: '100%', padding: '12px', fontSize: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', marginBottom: '8px' }}
+              />
+              <p style={{ fontSize: '13px', color: 'var(--color-text-muted, #aaa)', marginBottom: '20px' }}>
+                Refund amount: <strong style={{ color: '#EF4444' }}>৳{(sellUnits * sharePrice).toLocaleString()}</strong>
+              </p>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button onClick={() => setShowSellModal(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                <button onClick={handleSellRequest} disabled={sellLoading || sellUnits <= 0 || sellUnits > (userData?.shares || 0)} className="btn" style={{ flex: 1, background: '#EF4444', color: '#fff', border: 'none', borderRadius: '8px', padding: '12px', fontWeight: 600, cursor: 'pointer', opacity: sellLoading ? 0.6 : 1 }}>
+                  {sellLoading ? 'Submitting...' : 'Submit Sell Request'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
