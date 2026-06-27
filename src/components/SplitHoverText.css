@@ -1,0 +1,58 @@
+/* ─── SplitHoverText — Rolling Character Animation ─── */
+
+.split-hover {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  cursor: inherit;
+}
+
+.split-hover-space {
+  display: inline-block;
+  width: 0.25em;
+}
+
+.split-hover-char {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.split-hover-primary,
+.split-hover-secondary {
+  display: block;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  transition-delay: calc(var(--i) * 0.018s);
+  will-change: transform;
+}
+
+.split-hover-secondary {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  color: var(--primary);
+  text-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+/* Hover triggers — roll up on parent hover */
+.split-hover:hover .split-hover-primary,
+a:hover .split-hover .split-hover-primary,
+button:hover .split-hover .split-hover-primary {
+  transform: translateY(-100%) skewY(-6deg);
+}
+
+.split-hover:hover .split-hover-secondary,
+a:hover .split-hover .split-hover-secondary,
+button:hover .split-hover .split-hover-secondary {
+  transform: translateY(-100%) skewY(0deg);
+}
+
+/* Mobile — no delay for instant feel */
+@media (max-width: 768px) {
+  .split-hover-primary,
+  .split-hover-secondary {
+    transition-delay: 0s !important;
+    transition-duration: 0.25s !important;
+  }
+}

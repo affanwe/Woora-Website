@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import TextShuffle from '../../components/TextShuffle';
+import SplitHoverText from '../../components/SplitHoverText';
 import ScrollReveal from '../../components/ScrollReveal';
 import { Landmark, ArrowLeft, Copy, Check, Sparkles, ShieldAlert, Clock } from 'lucide-react';
 
@@ -66,10 +66,10 @@ export default function BuyShares() {
               <p className="success-note">Our team will verify and activate your investment units within 1–4 business hours.</p>
               <div className="success-btns">
                 <button className="btn btn-primary" onClick={() => router.push('/dashboard')}>
-                  <TextShuffle>Go to Dashboard</TextShuffle>
+                  <SplitHoverText>Go to Dashboard</SplitHoverText>
                 </button>
                 <button className="btn btn-secondary" onClick={() => { setSuccess(false); setTrxId(''); setSharesCount(10); }}>
-                  <TextShuffle>Buy More</TextShuffle>
+                  <SplitHoverText>Buy More</SplitHoverText>
                 </button>
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function BuyShares() {
                 </div>
 
                 <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                  <TextShuffle>{loading ? 'Submitting...' : 'Submit Purchase Request'}</TextShuffle>
+                  <SplitHoverText>{loading ? 'Submitting...' : 'Submit Purchase Request'}</SplitHoverText>
                 </button>
               </form>
             </div>

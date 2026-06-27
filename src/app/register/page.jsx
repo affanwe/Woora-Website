@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { UserPlus, Eye, EyeOff, Mail, Lock, Phone, ArrowRight } from 'lucide-react';
-import TextShuffle from '../../components/TextShuffle';
+import SplitHoverText from '../../components/SplitHoverText';
 import ScrollReveal from '../../components/ScrollReveal';
 
 export default function Register() {
@@ -133,7 +133,7 @@ function RegisterInner() {
                 {loading ? (
                   <span className="btn-auth-loading"><span className="auth-spinner" /> Creating Account...</span>
                 ) : (
-                  <><UserPlus size={18} /><TextShuffle>Create Account</TextShuffle></>
+                  <><UserPlus size={18} /><SplitHoverText>Create Account</SplitHoverText></>
                 )}
               </button>
             </form>
@@ -142,7 +142,7 @@ function RegisterInner() {
             <div className="auth-footer-3d">
               <p>Already have an account?{' '}
                 <Link href="/login" className="auth-link-3d">
-                  <TextShuffle>Login Here</TextShuffle><ArrowRight size={14} />
+                  <SplitHoverText>Login Here</SplitHoverText><ArrowRight size={14} />
                 </Link>
               </p>
             </div>

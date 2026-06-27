@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import TextShuffle from './TextShuffle';
+import SplitHoverText from './SplitHoverText';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
@@ -24,10 +24,10 @@ export default function Footer() {
         <div className="footer-links-col">
           <h4 className="footer-heading">Navigation</h4>
           <ul className="footer-link-list">
-            <li><Link href="/"><TextShuffle>Home</TextShuffle></Link></li>
-            <li><Link href="/projects"><TextShuffle>Projects</TextShuffle></Link></li>
-            <li><Link href="/about"><TextShuffle>About</TextShuffle></Link></li>
-            <li><Link href="/login"><TextShuffle>Investor Login</TextShuffle></Link></li>
+            <li><Link href="/"><SplitHoverText>Home</SplitHoverText></Link></li>
+            <li><Link href="/projects"><SplitHoverText>Projects</SplitHoverText></Link></li>
+            <li><Link href="/about"><SplitHoverText>About</SplitHoverText></Link></li>
+            <li><Link href="/login"><SplitHoverText>Investor Login</SplitHoverText></Link></li>
           </ul>
         </div>
 
@@ -44,8 +44,8 @@ export default function Footer() {
       <div className="container footer-bottom">
         <p>&copy; {currentYear} WOORA Group. All Rights Reserved.</p>
         <div className="footer-legal-links">
-          <a href="#privacy"><TextShuffle>Privacy</TextShuffle></a>
-          <a href="#terms"><TextShuffle>Terms</TextShuffle></a>
+          <a href="#privacy"><SplitHoverText>Privacy</SplitHoverText></a>
+          <a href="#terms"><SplitHoverText>Terms</SplitHoverText></a>
           <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>Powered by Woora Tech</span>
         </div>
       </div>

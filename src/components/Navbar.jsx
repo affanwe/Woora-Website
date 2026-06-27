@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import TextShuffle from './TextShuffle';
+import SplitHoverText from './SplitHoverText';
 import { Menu, X, LogOut, Database } from 'lucide-react';
 
 export default function Navbar() {
@@ -64,7 +64,7 @@ export default function Navbar() {
         <div className="navbar-inner container">
           <Link href="/" className="navbar-logo">
             <span className="logo-mark">W</span>
-            <TextShuffle className="logo-text">WOORA</TextShuffle>
+            <SplitHoverText className="logo-text">WOORA</SplitHoverText>
           </Link>
 
           {/* Desktop Nav */}
@@ -75,7 +75,7 @@ export default function Navbar() {
                 href={link.path}
                 className={`nav-link ${isActive(link.path) ? 'is-active' : ''}`}
               >
-                <TextShuffle>{link.label}</TextShuffle>
+                <SplitHoverText>{link.label}</SplitHoverText>
               </Link>
             ))}
           </div>
@@ -83,11 +83,11 @@ export default function Navbar() {
           <div className="navbar-right">
             {currentUser ? (
               <button className="nav-link nav-logout" onClick={handleLogout}>
-                <TextShuffle>Logout</TextShuffle>
+                <SplitHoverText>Logout</SplitHoverText>
               </button>
             ) : (
               <Link href="/login" className="btn btn-primary nav-cta">
-                <TextShuffle>Invest Now</TextShuffle>
+                <SplitHoverText>Invest Now</SplitHoverText>
               </Link>
             )}
           </div>

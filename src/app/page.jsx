@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
-import TextShuffle from '../components/TextShuffle';
+import SplitHoverText from '../components/SplitHoverText';
 import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import { supabase } from '../lib/supabase';
@@ -177,7 +177,7 @@ export default function Home() {
                       <span className="featured-index">0{i + 1}</span>
                       <div className="featured-text">
                         <h3 className="featured-name">
-                          <TextShuffle>{project.name}</TextShuffle>
+                          <SplitHoverText>{project.name}</SplitHoverText>
                         </h3>
                         <div className="featured-meta">
                           <span className="featured-category">{project.category}</span>
@@ -204,7 +204,7 @@ export default function Home() {
           <ScrollReveal>
             <div className="text-center" style={{ marginTop: '48px' }}>
               <Link href="/projects" className="btn btn-secondary">
-                <TextShuffle>View All Projects</TextShuffle>
+                <SplitHoverText>View All Projects</SplitHoverText>
                 <ArrowRight size={16} />
               </Link>
             </div>
@@ -278,7 +278,7 @@ export default function Home() {
                 </div>
 
                 <Link href={currentUser ? '/buy-shares' : '/register'} className="btn btn-primary btn-block">
-                  <TextShuffle>Start Investing</TextShuffle>
+                  <SplitHoverText>Start Investing</SplitHoverText>
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -297,11 +297,11 @@ export default function Home() {
             </p>
             <div className="hero-actions">
               <Link href={currentUser ? '/dashboard' : '/register'} className="btn btn-primary btn-lg hero-btn-glow">
-                <TextShuffle>Get Started</TextShuffle>
+                <SplitHoverText>Get Started</SplitHoverText>
                 <ArrowRight size={18} />
               </Link>
               <Link href="/projects" className="btn btn-secondary btn-lg">
-                <TextShuffle>View Projects</TextShuffle>
+                <SplitHoverText>View Projects</SplitHoverText>
               </Link>
             </div>
           </ScrollReveal>

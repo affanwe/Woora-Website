@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
-import TextShuffle from '../../components/TextShuffle';
+import SplitHoverText from '../../components/SplitHoverText';
 import ScrollReveal from '../../components/ScrollReveal';
 import TiltCard from '../../components/TiltCard';
 import {
@@ -128,7 +128,7 @@ export default function Dashboard() {
               <p className="dash-sub">Your investment overview and portfolio tracker.</p>
             </div>
             <Link href="/buy-shares" className="btn btn-primary">
-              <Plus size={16} /> <TextShuffle>Buy Investment Units</TextShuffle>
+              <Plus size={16} /> <SplitHoverText>Buy Investment Units</SplitHoverText>
             </Link>
           </header>
         </ScrollReveal>

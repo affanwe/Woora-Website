@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { LogIn, Eye, EyeOff, Mail, Lock, Database, ArrowRight } from 'lucide-react';
-import TextShuffle from '../../components/TextShuffle';
+import SplitHoverText from '../../components/SplitHoverText';
 import ScrollReveal from '../../components/ScrollReveal';
 
 export default function Login() {
@@ -137,7 +137,7 @@ export default function Login() {
                 ) : (
                   <>
                     <LogIn size={18} />
-                    <TextShuffle>Sign In</TextShuffle>
+                    <SplitHoverText>Sign In</SplitHoverText>
                   </>
                 )}
               </button>
@@ -151,7 +151,7 @@ export default function Login() {
               <p>
                 New to WOORA Group?{' '}
                 <Link href="/register" className="auth-link-3d">
-                  <TextShuffle>Create an Account</TextShuffle>
+                  <SplitHoverText>Create an Account</SplitHoverText>
                   <ArrowRight size={14} />
                 </Link>
               </p>

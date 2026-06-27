@@ -8,6 +8,7 @@ import '../components/Navbar.css';
 import '../components/Footer.css';
 import '../components/ScrollReveal.css';
 import '../components/TextShuffle.css';
+import '../components/SplitHoverText.css';
 import '../components/TiltCard.css';
 import '../components/3d/GlobalBackground.css';
 import '../pages/About.css';
