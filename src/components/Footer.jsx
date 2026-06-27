@@ -4,9 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import SplitHoverText from './SplitHoverText';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { footer } = useSiteSettings();
 
   return (
     <footer className="footer">
@@ -17,7 +19,7 @@ export default function Footer() {
             <span className="logo-text">WOORA GROUP</span>
           </Link>
           <p className="footer-desc">
-            Connecting investors with institutional-grade opportunities across Real Estate, Technology, Agriculture, and Renewable Energy sectors.
+            {footer.description}
           </p>
         </div>
 
@@ -34,9 +36,9 @@ export default function Footer() {
         <div className="footer-links-col">
           <h4 className="footer-heading">Contact</h4>
           <ul className="footer-contact-list">
-            <li><Mail size={14} /> support@wooragroup.com</li>
-            <li><Phone size={14} /> +880 1712-345678</li>
-            <li><MapPin size={14} /> Gulshan 2, Dhaka</li>
+            <li><Mail size={14} /> {footer.email}</li>
+            <li><Phone size={14} /> {footer.phone}</li>
+            <li><MapPin size={14} /> {footer.address}</li>
           </ul>
         </div>
       </div>
@@ -46,7 +48,7 @@ export default function Footer() {
         <div className="footer-legal-links">
           <a href="#privacy"><SplitHoverText>Privacy</SplitHoverText></a>
           <a href="#terms"><SplitHoverText>Terms</SplitHoverText></a>
-          <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>Powered by Woora Tech</span>
+          <span style={{ opacity: 0.5, fontSize: '0.75rem' }}>{footer.poweredBy}</span>
         </div>
       </div>
     </footer>

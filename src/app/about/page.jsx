@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import ScrollReveal from '../../components/ScrollReveal';
 import { supabase } from '../../lib/supabase';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 function formatCapital(amount) {
   if (amount <= 0) return '৳0';
@@ -32,34 +33,10 @@ function formatInvestors(count) {
   return `${count}+`;
 }
 
-const values = [
-  {
-    icon: ShieldCheck,
-    title: 'Transparency',
-    description:
-      'Every investment decision, fund allocation, and project update is shared openly with our investor community. No hidden fees, no surprises.',
-  },
-  {
-    icon: Lightbulb,
-    title: 'Innovation',
-    description:
-      'We leverage cutting-edge fintech, blockchain verification, and AI-driven analytics to identify and manage the highest-potential investment opportunities.',
-  },
-  {
-    icon: Lock,
-    title: 'Security',
-    description:
-      'Enterprise-grade data encryption, multi-layer admin verification, and strict regulatory compliance protect every transaction and investor account.',
-  },
-  {
-    icon: Sprout,
-    title: 'Growth',
-    description:
-      'Our diversified portfolio strategy across multiple high-growth sectors ensures consistent, compounding returns for long-term wealth creation.',
-  },
-];
+const VALUE_ICONS = [ShieldCheck, Lightbulb, Lock, Sprout];
 
 export default function About() {
+  const { about: aboutSettings, company } = useSiteSettings();
   const [statsData, setStatsData] = useState({ active_investors: 0, total_capital: 0, active_projects: 3 });
 
   useEffect(() => {
@@ -68,8 +45,14 @@ export default function About() {
     });
   }, []);
 
+  const dynamicValues = (aboutSettings?.values || []).map((v, i) => ({
+    icon: VALUE_ICONS[i % VALUE_ICONS.length],
+    title: v.title,
+    description: v.description,
+  }));
+
   const stats = [
-    { icon: CalendarDays, label: 'Founded',   value: '2026',                                    color: 'emerald' },
+    { icon: CalendarDays, label: 'Founded',   value: company?.foundedYear || '2026',            color: 'emerald' },
     { icon: Users,        label: 'Investors',  value: formatInvestors(statsData.active_investors), color: 'gold'    },
     { icon: Wallet,       label: 'Invested',   value: formatCapital(statsData.total_capital),     color: 'blue'    },
     { icon: FolderKanban, label: 'Projects',   value: `${statsData.active_projects}+`,            color: 'emerald' },
@@ -113,28 +96,17 @@ export default function About() {
               <div className="about-story__text-block">
                 <span className="section-label">Our Story</span>
                 <h2 className="about-story__heading">
-                  Democratizing Investment<br />
-                  Access in <span className="gradient-text-gold">Bangladesh</span>
+                  {aboutSettings?.storyHeading?.split(' in ').map((part, i, arr) =>
+                    i < arr.length - 1
+                      ? <React.Fragment key={i}>{part}<br />in <span className="gradient-text-gold">{arr[i + 1]}</span></React.Fragment>
+                      : i === 0 && arr.length === 1
+                        ? <React.Fragment key={i}>{part}</React.Fragment>
+                        : null
+                  )}
                 </h2>
-                <p className="about-story__paragraph">
-                  Founded with a vision to democratize investment access in Bangladesh,
-                  WOORA Group connects everyday investors with institutional-grade
-                  opportunities across Real Estate, Technology, Agriculture, and
-                  Renewable Energy sectors.
-                </p>
-                <p className="about-story__paragraph">
-                  We believe that wealth creation shouldn't be reserved for the
-                  privileged few. By fractionalizing ownership of premium assets into
-                  affordable shares starting at just ৳500, we've opened the doors
-                  for Bangladeshi citizens to participate in
-                  institutional-quality investments that were previously inaccessible.
-                </p>
-                <p className="about-story__paragraph">
-                  Our team comprises seasoned financial analysts, technology experts,
-                  and industry veterans who work tirelessly to identify, vet, and
-                  manage high-yield opportunities — so our investors can grow their
-                  wealth with confidence.
-                </p>
+                {(aboutSettings?.storyParagraphs || []).map((p, idx) => (
+                  <p key={idx} className="about-story__paragraph">{p}</p>
+                ))}
               </div>
             </ScrollReveal>
 
@@ -170,11 +142,7 @@ export default function About() {
                 </div>
                 <h3 className="about-mv-card__title">Our Mission</h3>
                 <p className="about-mv-card__text">
-                  To empower every citizen of Bangladesh with accessible, transparent,
-                  and high-yield investment opportunities. We strive to break down
-                  financial barriers and build a platform where anyone — regardless of
-                  economic background — can participate in institutional-grade asset
-                  ownership and create sustainable, generational wealth.
+                  {aboutSettings?.mission || 'To empower every citizen of Bangladesh with accessible, transparent, and high-yield investment opportunities.'}
                 </p>
               </div>
 
@@ -184,11 +152,7 @@ export default function About() {
                 </div>
                 <h3 className="about-mv-card__title">Our Vision</h3>
                 <p className="about-mv-card__text">
-                  To become South Asia's most trusted fractional investment platform
-                  by 2030, managing over ৳50 Billion in diversified assets. We envision
-                  a future where technology-driven financial inclusion eliminates
-                  inequality and creates a thriving community of empowered investors
-                  building wealth together.
+                  {aboutSettings?.vision || "To become South Asia's most trusted fractional investment platform."}
                 </p>
               </div>
             </div>
@@ -211,7 +175,7 @@ export default function About() {
           </ScrollReveal>
 
           <div className="about-values__grid">
-            {values.map((item, idx) => {
+            {dynamicValues.map((item, idx) => {
               const IconComp = item.icon;
               return (
                 <ScrollReveal key={item.title} direction="up" delay={0.1 + idx * 0.1}>

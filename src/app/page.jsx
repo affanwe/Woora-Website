@@ -8,6 +8,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import { supabase } from '../lib/supabase';
 import { ArrowRight, TrendingUp, Users, Wallet, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
+import { useSiteSettings } from '../context/SiteSettingsContext';
 
 // Animated character reveal — each character appears one at a time, wrapping at word boundaries
 function AnimatedText({ text, className = '', delay = 0 }) {
@@ -84,6 +85,8 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
 
 export default function Home() {
   const { currentUser } = useAuth();
+  const { home: homeSettings } = useSiteSettings();
+  const sharePrice = homeSettings?.sharePrice || 500;
   const [stats, setStats]       = useState({ active_investors: 0, total_capital: 0, active_projects: 0 });
   const [featuredProjects, setFeaturedProjects] = useState([]);
 
@@ -103,14 +106,14 @@ export default function Home() {
         <div className="container hero-content">
           <h1 className="hero-title">
             <span className="hero-line hero-line-1">
-              <AnimatedText text="Let's make" delay={0.5} />
+              <AnimatedText text={homeSettings?.heroLine1 || "Let's make"} delay={0.5} />
             </span>
             <span className="hero-line hero-line-2 gradient-text">
-              <AnimatedText text="Your dream a reality" delay={1.1} className="gradient-text-chars" />
+              <AnimatedText text={homeSettings?.heroLine2 || 'Your dream a reality'} delay={1.1} className="gradient-text-chars" />
             </span>
           </h1>
           <p className="hero-subtitle hero-animate-in" style={{ animationDelay: '2.3s' }}>
-            Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳500 per share.
+            {homeSettings?.heroSubtitle || `Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳${sharePrice.toLocaleString()} per share.`}
           </p>
         </div>
 
@@ -145,7 +148,7 @@ export default function Home() {
               </div>
               <div className="stat-card">
                 <div className="stat-icon text-blue"><TrendingUp size={24} /></div>
-                <div className="stat-value"><AnimatedCounter target={25} suffix="%" /></div>
+                <div className="stat-value"><AnimatedCounter target={homeSettings?.roiDisplay || 25} suffix="%" /></div>
                 <div className="stat-label">Average Annual ROI</div>
               </div>
               <div className="stat-card">
@@ -227,7 +230,7 @@ export default function Home() {
                 <div className="feature-row">
                   <div className="feature-icon-circle"><ShieldCheck size={18} /></div>
                   <div>
-                    <h4>৳500 Per Share</h4>
+                    <h4>৳{sharePrice.toLocaleString()} Per Share</h4>
                     <p>Start investing with as little as one share. Build your portfolio over time.</p>
                   </div>
                 </div>
@@ -255,26 +258,18 @@ export default function Home() {
                 <h3 className="pricing-title">Share Pricing</h3>
                 <div className="pricing-big">
                   <span className="pricing-currency">৳</span>
-                  <span className="pricing-amount">500</span>
+                  <span className="pricing-amount">{sharePrice.toLocaleString()}</span>
                   <span className="pricing-per">/ share</span>
                 </div>
 
                 <div className="pricing-tiers">
-                  <div className="tier">
-                    <span className="tier-label">Bronze</span>
-                    <span className="tier-shares">50 Shares</span>
-                    <span className="tier-cost">৳25,000</span>
-                  </div>
-                  <div className="tier is-highlighted">
-                    <span className="tier-label">Silver</span>
-                    <span className="tier-shares">200 Shares</span>
-                    <span className="tier-cost">৳100,000</span>
-                  </div>
-                  <div className="tier">
-                    <span className="tier-label">Gold</span>
-                    <span className="tier-shares">1,000 Shares</span>
-                    <span className="tier-cost">৳500,000</span>
-                  </div>
+                  {(homeSettings?.tiers || []).map((tier, idx) => (
+                    <div key={idx} className={`tier${idx === 1 ? ' is-highlighted' : ''}`}>
+                      <span className="tier-label">{tier.name}</span>
+                      <span className="tier-shares">{tier.shares.toLocaleString()} Shares</span>
+                      <span className="tier-cost">৳{tier.cost.toLocaleString()}</span>
+                    </div>
+                  ))}
                 </div>
 
                 <Link href={currentUser ? '/buy-shares' : '/register'} className="btn btn-primary btn-block">
@@ -291,9 +286,9 @@ export default function Home() {
       <section className="section bottom-cta-section text-center" style={{ borderTop: '1px solid var(--border-color)', padding: '100px 0' }}>
         <div className="container">
           <ScrollReveal>
-            <h2 className="section-title" style={{ marginBottom: '16px' }}>Ready to Get Started?</h2>
+            <h2 className="section-title" style={{ marginBottom: '16px' }}>{homeSettings?.ctaTitle || 'Ready to Get Started?'}</h2>
             <p className="section-subtitle" style={{ marginBottom: '40px', marginLeft: 'auto', marginRight: 'auto' }}>
-              Create an account or explore our active projects to start investing today.
+              {homeSettings?.ctaSubtitle || 'Create an account or explore our active projects to start investing today.'}
             </p>
             <div className="hero-actions">
               <Link href={currentUser ? '/dashboard' : '/register'} className="btn btn-primary btn-lg hero-btn-glow">

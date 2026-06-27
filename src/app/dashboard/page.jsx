@@ -11,14 +11,17 @@ import {
   User, Phone, Mail, Hash, FileText, AlertCircle, Plus,
   BarChart3, Calendar, ArrowUpRight, Hourglass, ShieldCheck, ArrowRight
 } from 'lucide-react';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 export default function Dashboard() {
   const { userData, profitData, returnPayments, shareRequests } = useAuth();
+  const { home: homeSettings } = useSiteSettings();
+  const sharePrice = homeSettings?.sharePrice || 500;
   const [copied, setCopied] = useState(false);
   const [referralLink, setReferralLink] = useState('');
 
   const totalUnits = (userData?.shares || 0) + (userData?.awardedFreeShares || 0);
-  const investedAmount = (userData?.shares || 0) * 500;
+  const investedAmount = (userData?.shares || 0) * sharePrice;
   const totalProfit = profitData?.totalProfit || 0;
   const pendingProfit = profitData?.pendingProfit || 0;
   const thisMonthProfit = profitData?.thisMonthProfit || 0;
@@ -54,19 +57,19 @@ export default function Dashboard() {
           <ScrollReveal direction="up">
             <div style={{
               background: 'var(--color-surface)',
-              border: '1px solid rgba(16,185,129,0.25)',
+              border: '1px solid rgba(0,208,156,0.25)',
               borderRadius: '20px',
               padding: '48px 40px',
               maxWidth: '520px',
               width: '100%',
-              boxShadow: '0 0 60px rgba(16,185,129,0.08)'
+              boxShadow: '0 0 60px rgba(0,208,156,0.08)'
             }}>
               <div style={{
                 width: '72px', height: '72px', borderRadius: '50%',
-                background: 'linear-gradient(135deg,#10b981,#059669)',
+                background: 'linear-gradient(135deg,#00D09C,#00B386)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 24px',
-                boxShadow: '0 0 30px rgba(16,185,129,0.3)'
+                boxShadow: '0 0 30px rgba(0,208,156,0.3)'
               }}>
                 <ShieldCheck size={32} color="#fff" />
               </div>
@@ -83,11 +86,11 @@ export default function Dashboard() {
 
               {/* Step indicators */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px', justifyContent: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#10b981' }}>
-                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>✓</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#00D09C' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#00D09C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>✓</div>
                   <span>Account Created</span>
                 </div>
-                <div style={{ flex: 1, height: '2px', background: 'linear-gradient(90deg,#10b981,var(--color-primary))', borderRadius: '2px', maxWidth: '60px' }} />
+                <div style={{ flex: 1, height: '2px', background: 'linear-gradient(90deg,#00D09C,var(--color-primary))', borderRadius: '2px', maxWidth: '60px' }} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--color-primary)' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--color-primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px' }}>2</div>
                   <span>Complete Profile</span>
@@ -96,11 +99,11 @@ export default function Dashboard() {
 
               <Link href="/activate" style={{
                 display: 'inline-flex', alignItems: 'center', gap: '10px',
-                background: 'linear-gradient(135deg,#10b981,#059669)',
+                background: 'linear-gradient(135deg,#00D09C,#00B386)',
                 color: '#fff', fontWeight: 700, fontSize: '1rem',
                 padding: '14px 32px', borderRadius: '12px',
                 textDecoration: 'none', transition: 'opacity 0.2s',
-                boxShadow: '0 4px 20px rgba(16,185,129,0.3)'
+                boxShadow: '0 4px 20px rgba(0,208,156,0.3)'
               }}>
                 <ShieldCheck size={20} />
                 Activate Your Account
@@ -298,7 +301,7 @@ export default function Dashboard() {
                         <tr key={idx}>
                           <td>{inv.joiningDate || 'N/A'}</td>
                           <td className="fw-600">{inv.shares}</td>
-                          <td className="fw-700">৳{(inv.amount || inv.shares * 500).toLocaleString()}</td>
+                          <td className="fw-700">৳{(inv.amount || inv.shares * sharePrice).toLocaleString()}</td>
                           <td><code className="trx-code">{inv.trxId || 'N/A'}</code></td>
                           <td>
                             <span className={`badge badge-${inv.status?.toLowerCase() || 'pending'}`}>

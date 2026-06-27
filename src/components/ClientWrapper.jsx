@@ -3,6 +3,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { AuthProvider } from '../context/AuthContext';
+import { SiteSettingsProvider } from '../context/SiteSettingsContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
@@ -12,6 +13,7 @@ const GlobalBackground = dynamic(() => import('./3d/GlobalBackground'), { ssr: f
 
 export default function ClientWrapper({ children }) {
   return (
+    <SiteSettingsProvider>
     <AuthProvider>
       <SmoothScroll>
         <div className="app-wrapper">
@@ -24,5 +26,6 @@ export default function ClientWrapper({ children }) {
         </div>
       </SmoothScroll>
     </AuthProvider>
+    </SiteSettingsProvider>
   );
 }
