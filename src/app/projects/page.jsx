@@ -8,7 +8,7 @@ import TiltCard from '../../components/TiltCard';
 import { supabase } from '../../lib/supabase';
 
 const STATUS_STYLES = {
-  'Running':     { background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' },
+  'Running':     { background: 'rgba(0,208,156,0.15)', color: '#00D09C', border: '1px solid rgba(0,208,156,0.3)' },
   'Coming Soon': { background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' },
   'Planning':    { background: 'rgba(99,102,241,0.15)', color: '#818CF8', border: '1px solid rgba(99,102,241,0.3)' },
 };

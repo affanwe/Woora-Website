@@ -78,7 +78,7 @@ function RegisterInner() {
             </div>
 
             {referredBy && (
-              <div className="demo-info-box-3d" style={{ borderColor: '#10b981' }}>
+              <div className="demo-info-box-3d" style={{ borderColor: '#00D09C' }}>
                 <span className="demo-info-title-3d"><UserPlus size={14} /> Referral Detected</span>
                 <p>You were referred by Investor <strong>#{referredBy}</strong>.</p>
               </div>

@@ -93,7 +93,7 @@ export default function Activate() {
             <div className="auth-card-3d__glow-border" />
 
             <div className="auth-header-3d">
-              <div className="auth-logo-badge-3d" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+              <div className="auth-logo-badge-3d" style={{ background: 'linear-gradient(135deg,#00D09C,#00B386)' }}>
                 <CheckCircle size={20} />
               </div>
               <h2 className="auth-header-3d__title">Activate Your Account</h2>
@@ -104,18 +104,18 @@ export default function Activate() {
 
             {/* Step indicator */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', justifyContent: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#10b981' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10b981', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '12px' }}>✓</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#00D09C' }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#00D09C', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '12px' }}>✓</div>
                 Account Created
               </div>
-              <div style={{ flex: 1, height: '2px', background: 'linear-gradient(90deg,#10b981,var(--color-primary))', alignSelf: 'center', borderRadius: '2px' }} />
+              <div style={{ flex: 1, height: '2px', background: 'linear-gradient(90deg,#00D09C,var(--color-primary))', alignSelf: 'center', borderRadius: '2px' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--color-primary)' }}>
                 <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--color-primary)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '12px' }}>2</div>
                 Complete Profile
               </div>
             </div>
 
-            <div style={{ padding: '12px 16px', borderRadius: '8px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', marginBottom: '20px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
+            <div style={{ padding: '12px 16px', borderRadius: '8px', background: 'rgba(0,208,156,0.08)', border: '1px solid rgba(0,208,156,0.2)', marginBottom: '20px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
               Your Investor ID: <strong style={{ color: 'var(--color-primary)' }}>#{userData.id}</strong> &nbsp;|&nbsp; Email: <strong>{userData.email}</strong>
             </div>
 
@@ -184,7 +184,7 @@ export default function Activate() {
                 </div>
               </div>
 
-              <button type="submit" className="btn-auth-submit" disabled={loading} style={{ background: 'linear-gradient(135deg,#10b981,#059669)', marginTop: '8px' }}>
+              <button type="submit" className="btn-auth-submit" disabled={loading} style={{ background: 'linear-gradient(135deg,#00D09C,#00B386)', marginTop: '8px' }}>
                 {loading
                   ? <span className="btn-auth-loading"><span className="auth-spinner" /> Activating...</span>
                   : <><CheckCircle size={18} /> Activate My Account <ArrowRight size={16} /></>}

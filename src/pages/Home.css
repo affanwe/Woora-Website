@@ -21,7 +21,7 @@
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, #050505 80%);
+  background: radial-gradient(ellipse at center, rgba(6,9,15,0) 30%, #06090F 80%);
   z-index: 1;
   pointer-events: none;
 }
@@ -58,8 +58,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(16, 185, 129, 0.06);
-  border: 1px solid rgba(16, 185, 129, 0.15);
+  background: rgba(0, 208, 156, 0.06);
+  border: 1px solid rgba(0, 208, 156, 0.15);
   color: var(--primary);
   padding: 8px 20px;
   border-radius: 9999px;
@@ -123,7 +123,7 @@
 
 /* Gradient text for animated characters in line 2 */
 .gradient-text-chars .animated-char {
-  background: linear-gradient(135deg, #ffffff 0%, #10b981 50%, #d4a843 100%);
+  background: linear-gradient(135deg, #E8ECF4 0%, #00D09C 50%, #4F8BFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -228,7 +228,8 @@
 }
 
 .stat-card:hover {
-  background: rgba(16, 185, 129, 0.03);
+  background: rgba(0, 208, 156, 0.03);
+  border-left: 2px solid var(--primary);
 }
 
 .stat-icon {
@@ -275,7 +276,7 @@
 }
 
 .featured-item:hover {
-  background: rgba(16, 185, 129, 0.02);
+  background: rgba(0, 208, 156, 0.02);
 }
 
 .featured-item-inner {
@@ -399,7 +400,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(16, 185, 129, 0.08);
+  background: rgba(0, 208, 156, 0.08);
   color: var(--primary);
   display: flex;
   align-items: center;
@@ -482,8 +483,8 @@
 }
 
 .tier:hover, .tier.is-highlighted {
-  border-color: rgba(16, 185, 129, 0.3);
-  background: rgba(16, 185, 129, 0.03);
+  border-color: rgba(0, 208, 156, 0.3);
+  background: rgba(0, 208, 156, 0.03);
 }
 
 .tier-label {

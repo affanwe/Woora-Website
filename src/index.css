@@ -1,6 +1,6 @@
 /* ========================================
-   WOORA GROUP — 3D Interactive Theme
-   Premium Dark Mode Design System
+   WOORA GROUP — Premium Navy Fintech Theme
+   Deep Navy Dark Mode Design System
    ======================================== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
@@ -8,30 +8,33 @@
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
 
-  /* Color Palette — Cinematic Dark */
-  --bg-dark: #050505;
-  --bg-surface: #0a0a0a;
-  --bg-card: rgba(12, 12, 12, 0.75);
-  --bg-card-solid: #0c0c0c;
-  --bg-card-hover: rgba(18, 18, 18, 0.9);
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(16, 185, 129, 0.35);
+  /* Color Palette — Deep Navy Fintech */
+  --bg-dark: #06090F;
+  --bg-surface: #0C1220;
+  --bg-card: rgba(14, 21, 38, 0.65);
+  --bg-card-solid: #0E1526;
+  --bg-card-hover: rgba(18, 28, 50, 0.85);
+  --border-color: rgba(148, 163, 199, 0.08);
+  --border-hover: rgba(0, 208, 156, 0.25);
 
-  --primary: #10b981;
-  --primary-hover: #059669;
-  --primary-glow: rgba(16, 185, 129, 0.2);
+  --primary: #00D09C;
+  --primary-hover: #00B386;
+  --primary-glow: rgba(0, 208, 156, 0.15);
 
-  --secondary: #d4a843;
-  --secondary-glow: rgba(212, 168, 67, 0.2);
+  --secondary: #F5B731;
+  --secondary-glow: rgba(245, 183, 49, 0.15);
 
-  --text-primary: #f5f5f5;
-  --text-secondary: #8a8a8a;
-  --text-muted: #555555;
+  --text-primary: #E8ECF4;
+  --text-secondary: #7B8CA8;
+  --text-muted: #4A5568;
 
-  --success: #10b981;
-  --warning: #f59e0b;
+  --success: #00D09C;
+  --warning: #F5B731;
   --danger: #ef4444;
-  --info: #3b82f6;
+  --info: #4F8BFF;
+
+  --gradient-accent: linear-gradient(135deg, #00D09C, #4F8BFF);
+  --gradient-primary: linear-gradient(135deg, #00D09C, #00B386);
 
   --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -81,7 +84,7 @@ button {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-dark); }
-::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: #1a2540; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
 /* ========================================
@@ -177,24 +180,24 @@ button {
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: #050505;
+  background: linear-gradient(135deg, #00D09C, #00B386);
+  color: #06090F;
   box-shadow: 0 0 20px var(--primary-glow);
 }
 .btn-primary:hover {
-  background: var(--primary-hover);
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #00B386, #009E73);
+  box-shadow: 0 0 30px rgba(0, 208, 156, 0.4);
   transform: translateY(-2px);
 }
 
 .btn-secondary {
   background: transparent;
   color: var(--text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(148, 163, 199, 0.15);
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(14, 21, 38, 0.5);
+  border-color: rgba(0, 208, 156, 0.3);
   transform: translateY(-1px);
 }
 
@@ -221,14 +224,14 @@ button {
   letter-spacing: 0.06em;
 }
 .badge-pending {
-  background: rgba(245, 158, 11, 0.08);
+  background: rgba(245, 183, 49, 0.08);
   color: var(--warning);
-  border: 1px solid rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 183, 49, 0.15);
 }
 .badge-active, .badge-approved {
-  background: rgba(16, 185, 129, 0.08);
+  background: rgba(0, 208, 156, 0.08);
   color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(0, 208, 156, 0.15);
 }
 .badge-rejected {
   background: rgba(239, 68, 68, 0.08);
@@ -236,9 +239,9 @@ button {
   border: 1px solid rgba(239, 68, 68, 0.15);
 }
 .badge-paid {
-  background: rgba(16, 185, 129, 0.08);
+  background: rgba(0, 208, 156, 0.08);
   color: var(--success);
-  border: 1px solid rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(0, 208, 156, 0.15);
 }
 
 /* ========================================
@@ -258,7 +261,7 @@ button {
   letter-spacing: 0.04em;
 }
 .form-control {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(6, 9, 15, 0.6);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
   padding: 14px 16px;
@@ -271,7 +274,7 @@ button {
 .form-control:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-glow);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(12, 18, 32, 0.8);
 }
 .form-control::placeholder {
   color: var(--text-muted);
@@ -279,7 +282,7 @@ button {
 
 select.form-control {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%238a8a8a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%237B8CA8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
   padding-right: 40px;
@@ -299,9 +302,9 @@ select.form-control {
   border: 1px solid transparent;
 }
 .alert-success {
-  background: rgba(16, 185, 129, 0.06);
-  color: #34d399;
-  border-color: rgba(16, 185, 129, 0.15);
+  background: rgba(0, 208, 156, 0.06);
+  color: #34d9a8;
+  border-color: rgba(0, 208, 156, 0.15);
 }
 .alert-error {
   background: rgba(239, 68, 68, 0.06);
@@ -309,9 +312,9 @@ select.form-control {
   border-color: rgba(239, 68, 68, 0.15);
 }
 .alert-info {
-  background: rgba(59, 130, 246, 0.06);
-  color: #93c5fd;
-  border-color: rgba(59, 130, 246, 0.15);
+  background: rgba(79, 139, 255, 0.06);
+  color: #93b5fd;
+  border-color: rgba(79, 139, 255, 0.15);
 }
 
 /* ========================================
@@ -329,7 +332,7 @@ select.form-control {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 2px solid rgba(16, 185, 129, 0.1);
+  border: 2px solid rgba(0, 208, 156, 0.1);
   border-radius: 50%;
   border-top-color: var(--primary);
   animation: spin 0.8s linear infinite;
@@ -340,12 +343,17 @@ select.form-control {
    Gradient Text Utilities
    ======================================== */
 .gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #10b981 100%);
+  background: linear-gradient(135deg, #E8ECF4 0%, #00D09C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .gradient-text-gold {
-  background: linear-gradient(135deg, #ffffff 0%, #d4a843 100%);
+  background: linear-gradient(135deg, #E8ECF4 0%, #F5B731 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.gradient-text-accent {
+  background: linear-gradient(135deg, #00D09C, #4F8BFF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

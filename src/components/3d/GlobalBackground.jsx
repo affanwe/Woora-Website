@@ -87,11 +87,11 @@ function CubesScene({ scrollYRef, mouseRef, isMobile }) {
     const count = isMobile ? 10 : 22;
     // Saturated/brighter aesthetic colors
     const colors = [
-      '#f3f4f6', // Silver/White
-      '#05d68d', // Bright Emerald green
-      '#f5bc3d', // Vibrant Gold
-      '#b79aff', // Lavender purple
-      '#3fe5ff', // Neon ice-blue
+      '#C8D0E0', // Muted silver-blue
+      '#00D09C', // Bright Mint
+      '#F5B731', // Warm Gold
+      '#8B7BFF', // Vivid lavender
+      '#4F8BFF', // Electric blue
     ];
 
     const temp = [];
@@ -196,8 +196,8 @@ export default function GlobalBackground() {
         {/* Stronger, premium lighting setup to make shapes pop */}
         <ambientLight intensity={0.9} />
         <directionalLight position={[5, 10, 5]} intensity={1.2} color="#ffffff" />
-        <directionalLight position={[-5, -5, -5]} intensity={0.6} color="#05d68d" />
-        <pointLight position={[0, 0, 5]} intensity={0.8} color="#f5bc3d" />
+        <directionalLight position={[-5, -5, -5]} intensity={0.6} color="#00D09C" />
+        <pointLight position={[0, 0, 5]} intensity={0.8} color="#4F8BFF" />
         
         <CubesScene scrollYRef={scrollYRef} mouseRef={mouseRef} isMobile={isMobile} />
       </Canvas>

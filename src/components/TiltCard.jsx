@@ -55,7 +55,7 @@ export default function TiltCard({ children, className = '', ...rest }) {
     : {
         background: `radial-gradient(
           600px circle at ${glowPos.x}% ${glowPos.y}%,
-          rgba(16, 185, 129, 0.12),
+          rgba(0, 208, 156, 0.12),
           transparent 40%
         )`,
       };
