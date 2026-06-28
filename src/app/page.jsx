@@ -283,7 +283,7 @@ export default function Home() {
       </section>
 
       {/* ======== BOTTOM CTA SECTION ======== */}
-      <section className="section bottom-cta-section text-center" style={{ borderTop: '1px solid var(--border-color)', padding: '100px 0' }}>
+      <section className="section bottom-cta-section text-center" style={{ borderTop: '1px solid var(--border-color)', padding: '60px 0' }}>
         <div className="container">
           <ScrollReveal>
             <h2 className="section-title" style={{ marginBottom: '16px' }}>{homeSettings?.ctaTitle || 'Ready to Get Started?'}</h2>
