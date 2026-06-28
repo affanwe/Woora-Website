@@ -300,3 +300,10 @@
     padding: 16px 16px 20px;
   }
 }
+
+/* Project Detail - mobile responsive sections */
+@media (max-width: 768px) {
+  .project-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
