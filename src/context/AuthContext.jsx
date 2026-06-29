@@ -283,6 +283,13 @@ export function AuthProvider({ children }) {
           throw investorError;
         }
         success = true;
+
+        // Send registration welcome email (fire-and-forget)
+        fetch('/api/send-welcome-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'registration', email, investorId: String(nextId) })
+        }).catch(err => console.error('Welcome email error:', err));
       }
       if (!success) throw new Error(lastError?.message || "Failed to create investor profile.");
     } catch (err) {
@@ -306,6 +313,13 @@ export function AuthProvider({ children }) {
     }).eq('id', userData.id);
     if (error) throw error;
     setUserData(prev => prev ? { ...prev, name: name.trim(), nid: nid.trim(), image, address: address.trim(), guardianMobile: guardianMobile.trim(), isActivated: true } : prev);
+
+    // Send activation congratulation email (fire-and-forget)
+    fetch('/api/send-welcome-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'activation', email: userData.email, investorId: userData.id, name: name.trim() })
+    }).catch(err => console.error('Activation email error:', err));
   }
 
   // Login
