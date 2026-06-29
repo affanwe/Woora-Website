@@ -125,11 +125,11 @@ export default function Activate() {
               {/* Photo */}
               <div className="form-group">
                 <label className="form-label-3d">Profile Photo <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span></label>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', padding: '24px', borderRadius: '16px', border: '2px dashed rgba(0,208,156,0.3)', background: 'rgba(0,208,156,0.03)', cursor: 'pointer', transition: 'all 0.3s' }}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '14px', borderRadius: '12px', border: '2px dashed rgba(0,208,156,0.3)', background: 'rgba(0,208,156,0.03)', cursor: 'pointer', transition: 'all 0.3s' }}
                   onClick={() => fileRef.current.click()}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,208,156,0.6)'; e.currentTarget.style.background = 'rgba(0,208,156,0.06)'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,208,156,0.3)'; e.currentTarget.style.background = 'rgba(0,208,156,0.03)'; }}>
-                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, position: 'relative', border: preview ? '3px solid #00D09C' : 'none' }}>
+                  <div style={{ width: '76px', height: '76px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, position: 'relative', border: preview ? '3px solid #00D09C' : 'none' }}>
                     {preview
                       ? <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : (
