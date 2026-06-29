@@ -125,20 +125,52 @@ export default function Activate() {
               {/* Photo */}
               <div className="form-group">
                 <label className="form-label-3d">Profile Photo <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>(optional)</span></label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div onClick={() => fileRef.current.click()}
-                    style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px dashed var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, background: 'var(--color-surface)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', padding: '24px', borderRadius: '16px', border: '2px dashed rgba(0,208,156,0.3)', background: 'rgba(0,208,156,0.03)', cursor: 'pointer', transition: 'all 0.3s' }}
+                  onClick={() => fileRef.current.click()}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,208,156,0.6)'; e.currentTarget.style.background = 'rgba(0,208,156,0.06)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,208,156,0.3)'; e.currentTarget.style.background = 'rgba(0,208,156,0.03)'; }}>
+                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, position: 'relative', border: preview ? '3px solid #00D09C' : 'none' }}>
                     {preview
                       ? <img src={preview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Upload size={22} color="var(--color-text-muted)" />}
+                      : (
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+                          <defs>
+                            <linearGradient id="avatarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#1a1a2e" />
+                              <stop offset="100%" stopColor="#16213e" />
+                            </linearGradient>
+                          </defs>
+                          <circle cx="50" cy="50" r="50" fill="url(#avatarGrad)" />
+                          <circle cx="50" cy="38" r="16" fill="rgba(0,208,156,0.25)" stroke="#00D09C" strokeWidth="1.5">
+                            <animate attributeName="r" values="16;17;16" dur="2s" repeatCount="indefinite" />
+                          </circle>
+                          <ellipse cx="50" cy="78" rx="26" ry="18" fill="rgba(0,208,156,0.25)" stroke="#00D09C" strokeWidth="1.5">
+                            <animate attributeName="ry" values="18;19;18" dur="2s" repeatCount="indefinite" />
+                          </ellipse>
+                          <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(0,208,156,0.3)" strokeWidth="1" strokeDasharray="6 4">
+                            <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite" />
+                          </circle>
+                          <g>
+                            <circle cx="50" cy="8" r="3.5" fill="rgba(0,208,156,0.6)">
+                              <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite" />
+                            </circle>
+                            <path d="M48 5 L50 2 L52 5" fill="none" stroke="rgba(0,208,156,0.6)" strokeWidth="1.2" strokeLinecap="round">
+                              <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite" />
+                            </path>
+                          </g>
+                        </svg>
+                      )}
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: 1.6 }}>
-                    <div>Max 3MB — auto-compressed before saving</div>
-                    <div>JPEG, PNG accepted</div>
-                    <button type="button" onClick={() => fileRef.current.click()}
-                      style={{ marginTop: '6px', background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', color: 'var(--color-text-muted)', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}>
-                      Choose Photo
+                  <div style={{ textAlign: 'center' }}>
+                    <button type="button"
+                      style={{
+                        background: 'linear-gradient(135deg, #00D09C, #00b386)', border: 'none', borderRadius: '10px',
+                        color: '#fff', padding: '10px 28px', cursor: 'pointer', fontSize: '14px', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 12px rgba(0,208,156,0.3)',
+                      }}>
+                      <Upload size={16} /> Upload Your Photo
                     </button>
+                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '8px', margin: '8px 0 0' }}>JPEG, PNG — Max 3MB</p>
                   </div>
                 </div>
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
