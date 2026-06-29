@@ -113,7 +113,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="hero-subtitle hero-animate-in" style={{ animationDelay: '2.3s' }}>
-            {homeSettings?.heroSubtitle || `Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳${sharePrice.toLocaleString()} per share.`}
+            {homeSettings?.heroSubtitle || `Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳${sharePrice.toLocaleString()} per investment unit.`}
           </p>
         </div>
 
@@ -221,17 +221,17 @@ export default function Home() {
           <ScrollReveal>
             <div className="share-text-col">
               <div className="section-eyebrow">Investment Access</div>
-              <h2 className="section-title">Fractional Share Ownership</h2>
+              <h2 className="section-title">Fractional Investment Unit Ownership</h2>
               <p className="section-subtitle" style={{ maxWidth: 'none', marginBottom: '32px' }}>
-                We fractionalize premium assets into affordable shares so that anyone can invest. No complex paperwork — just choose your share count, pay, and let your money grow.
+                We fractionalize premium assets into affordable investment units so that anyone can invest. No complex paperwork — just choose your unit count, pay, and let your money grow.
               </p>
 
               <div className="features-stack">
                 <div className="feature-row">
                   <div className="feature-icon-circle"><ShieldCheck size={18} /></div>
                   <div>
-                    <h4>৳{sharePrice.toLocaleString()} Per Share</h4>
-                    <p>Start investing with as little as one share. Build your portfolio over time.</p>
+                    <h4>৳{sharePrice.toLocaleString()} Per Investment Unit</h4>
+                    <p>Start investing with as little as one investment unit. Build your portfolio over time.</p>
                   </div>
                 </div>
                 <div className="feature-row">
@@ -255,18 +255,18 @@ export default function Home() {
           <ScrollReveal delay={0.2}>
             <TiltCard className="pricing-card glass-panel">
               <div className="pricing-card-inner">
-                <h3 className="pricing-title">Share Pricing</h3>
+                <h3 className="pricing-title">Investment Unit Pricing</h3>
                 <div className="pricing-big">
                   <span className="pricing-currency">৳</span>
                   <span className="pricing-amount">{sharePrice.toLocaleString()}</span>
-                  <span className="pricing-per">/ share</span>
+                  <span className="pricing-per">/ unit</span>
                 </div>
 
                 <div className="pricing-tiers">
                   {(homeSettings?.tiers || []).map((tier, idx) => (
                     <div key={idx} className={`tier${idx === 1 ? ' is-highlighted' : ''}`}>
                       <span className="tier-label">{tier.name}</span>
-                      <span className="tier-shares">{tier.shares.toLocaleString()} Shares</span>
+                      <span className="tier-shares">{tier.shares.toLocaleString()} Units</span>
                       <span className="tier-cost">৳{tier.cost.toLocaleString()}</span>
                     </div>
                   ))}

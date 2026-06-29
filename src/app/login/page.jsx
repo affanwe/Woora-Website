@@ -58,7 +58,7 @@ export default function Login() {
               <div className="auth-logo-badge-3d">W</div>
               <h2 className="auth-header-3d__title">Investor Portal</h2>
               <p className="auth-header-3d__subtitle">
-                Login to manage your shares and track investments
+                Login to manage your investment units and track investments
               </p>
             </div>
 
