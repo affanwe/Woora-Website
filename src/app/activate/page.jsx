@@ -116,7 +116,7 @@ export default function Activate() {
             </div>
 
             <div style={{ padding: '12px 16px', borderRadius: '8px', background: 'rgba(0,208,156,0.08)', border: '1px solid rgba(0,208,156,0.2)', marginBottom: '20px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
-              Your Investor ID: <strong style={{ color: 'var(--color-primary)' }}>#{userData.id}</strong> &nbsp;|&nbsp; Email: <strong>{userData.email}</strong>
+              Email: <strong>{userData.email}</strong> &nbsp;|&nbsp; Investor ID will be assigned after activation
             </div>
 
             {error && <div className="alert alert-error">{error}</div>}

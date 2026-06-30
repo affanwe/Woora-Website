@@ -248,77 +248,96 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // Create new investor with sequential ID
-      let success = false, retries = 5, lastError = null;
-      while (!success && retries > 0) {
-        const { data: counterData, error: counterError } = await supabase.from('metadata').select('value').eq('key', 'counters').single();
-        if (counterError) throw new Error("Failed to read server configuration.");
+      // Create investor record with temporary ID (real ID assigned on activation)
+      const tempId = `pending_${user.id.substring(0, 8)}`;
+      const { error: investorError } = await supabase.from('investors').insert({
+        id: tempId,
+        uid: user.id,
+        name: null,
+        email,
+        mobile,
+        shares: 0,
+        amount: 0,
+        awarded_free_shares: 0,
+        is_activated: false,
+        referred_by: referredBy || null
+      });
 
-        const lastId = counterData?.value?.lastInvestorId || 1000;
-        const nextId = lastId + 1;
-
-        const { error: updateError } = await supabase.from('metadata').update({ value: { ...counterData.value, lastInvestorId: nextId } }).eq('key', 'counters');
-        if (updateError) { retries--; lastError = updateError; continue; }
-
-        const { error: investorError } = await supabase.from('investors').insert({
-          id: String(nextId),
-          uid: user.id,
-          name: null,
-          email,
-          mobile,
-          shares: 0,
-          amount: 0,
-          awarded_free_shares: 0,
-          is_activated: false,
-          referred_by: referredBy || null
-        });
-
-        if (investorError) {
-          lastError = investorError;
-          if (investorError.code === '23505') {
-            if (investorError.message?.includes('uid') || investorError.message?.includes('email')) { success = true; break; }
-            retries--;
-            continue;
-          }
-          throw investorError;
+      if (investorError) {
+        if (investorError.code === '23505') {
+          if (investorError.message?.includes('uid') || investorError.message?.includes('email')) return;
         }
-        success = true;
-
-        // Send registration welcome email (fire-and-forget)
-        fetch('/api/send-welcome-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'registration', email, investorId: String(nextId) })
-        }).catch(err => console.error('Welcome email error:', err));
+        throw investorError;
       }
-      if (!success) throw new Error(lastError?.message || "Failed to create investor profile.");
+
+      // Send registration welcome email (fire-and-forget)
+      fetch('/api/send-welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'registration', email })
+      }).catch(err => console.error('Welcome email error:', err));
     } catch (err) {
       console.error("Registration error:", err);
       throw new Error(err.message || "An unexpected error occurred.");
     }
   }
 
-  // Activate account — fill profile details
+  // Activate account — assign real sequential ID and fill profile details
   async function activateAccount({ name, nid, image, address, guardianMobile }) {
     if (!currentUser || !userData) throw new Error("Must be logged in.");
-    const { error } = await supabase.from('investors').update({
-      name: name.trim(),
-      nid: nid.trim(),
-      image: image || null,
-      address: address.trim(),
-      guardian_mobile: guardianMobile.trim(),
-      is_activated: true,
-      status: 'Active',
-      updated_at: new Date().toISOString()
-    }).eq('id', userData.id);
-    if (error) throw error;
-    setUserData(prev => prev ? { ...prev, name: name.trim(), nid: nid.trim(), image, address: address.trim(), guardianMobile: guardianMobile.trim(), isActivated: true } : prev);
+
+    // Assign real sequential ID from the shared counter
+    let realId = userData.id;
+    if (userData.id.startsWith('pending_')) {
+      let assigned = false, retries = 5, lastError = null;
+      while (!assigned && retries > 0) {
+        const { data: counterData, error: counterError } = await supabase.from('metadata').select('value').eq('key', 'counters').single();
+        if (counterError) throw new Error("Failed to read server configuration.");
+
+        const lastId = counterData?.value?.lastInvestorId || 1000;
+        const nextId = lastId + 1;
+        realId = String(nextId);
+
+        const { error: updateError } = await supabase.from('metadata').update({ value: { ...counterData.value, lastInvestorId: nextId } }).eq('key', 'counters');
+        if (updateError) { retries--; lastError = updateError; continue; }
+
+        // Update the investor row: change temp ID to real ID and fill profile
+        const { error: idError } = await supabase.from('investors').update({
+          id: realId,
+          name: name.trim(),
+          nid: nid.trim(),
+          image: image || null,
+          address: address.trim(),
+          guardian_mobile: guardianMobile.trim(),
+          is_activated: true,
+          status: 'Active',
+          updated_at: new Date().toISOString()
+        }).eq('id', userData.id);
+        if (idError) { retries--; lastError = idError; continue; }
+        assigned = true;
+      }
+      if (!assigned) throw new Error(lastError?.message || "Failed to activate account.");
+    } else {
+      const { error } = await supabase.from('investors').update({
+        name: name.trim(),
+        nid: nid.trim(),
+        image: image || null,
+        address: address.trim(),
+        guardian_mobile: guardianMobile.trim(),
+        is_activated: true,
+        status: 'Active',
+        updated_at: new Date().toISOString()
+      }).eq('id', userData.id);
+      if (error) throw error;
+    }
+
+    setUserData(prev => prev ? { ...prev, id: realId, name: name.trim(), nid: nid.trim(), image, address: address.trim(), guardianMobile: guardianMobile.trim(), isActivated: true } : prev);
 
     // Send activation congratulation email (fire-and-forget)
     fetch('/api/send-welcome-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'activation', email: userData.email, investorId: userData.id, name: name.trim() })
+      body: JSON.stringify({ type: 'activation', email: userData.email, investorId: realId, name: name.trim() })
     }).catch(err => console.error('Activation email error:', err));
   }
 

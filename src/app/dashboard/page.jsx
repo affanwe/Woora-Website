@@ -102,7 +102,7 @@ export default function Dashboard() {
                 Welcome, <span className="gradient-text">{userData.email}</span>
               </h2>
               <p style={{ color: 'var(--color-text-muted)', marginBottom: '8px', lineHeight: 1.6 }}>
-                Your account has been created with Investor ID <strong style={{ color: 'var(--color-primary)' }}>#{userData.id}</strong>.
+                Your account has been created successfully.
               </p>
               <p style={{ color: 'var(--color-text-muted)', marginBottom: '32px', lineHeight: 1.6 }}>
                 To become an Investment Partner and access your dashboard, you need to complete your profile with your name, NID and photo.
@@ -366,7 +366,7 @@ export default function Dashboard() {
                 </div>
                 <div className="profile-rows">
                   {[
-                    { icon: Hash, label: 'Investor ID', value: userData?.id || 'Pending' },
+                    { icon: Hash, label: 'Investor ID', value: (userData?.id && !userData.id.startsWith('pending_')) ? userData.id : 'Assigned on activation' },
                     { icon: User, label: 'Name', value: userData?.name || 'N/A' },
                     { icon: Mail, label: 'Email', value: userData?.email || 'N/A' },
                     { icon: Phone, label: 'Mobile', value: userData?.mobile || 'N/A' },
