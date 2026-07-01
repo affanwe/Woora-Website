@@ -45,16 +45,17 @@
   position: relative;
 }
 
-.logo-img {
-  height: 38px;
-  width: auto;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
+.logo-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
   transition: var(--transition-smooth);
 }
 
-.navbar-logo:hover .logo-img {
-  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(0, 208, 156, 0.5));
+.navbar-logo:hover .logo-text {
+  text-shadow: 0 0 12px rgba(0, 208, 156, 0.5);
   transform: scale(1.05);
 }
 

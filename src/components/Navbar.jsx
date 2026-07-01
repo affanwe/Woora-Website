@@ -63,7 +63,7 @@ export default function Navbar() {
       <nav className={`navbar ${scrolled ? 'is-scrolled' : ''} ${isOpen ? 'is-open' : ''}`}>
         <div className="navbar-inner container">
           <Link href="/" className="navbar-logo">
-            <img src="/images/woora-logo.png" alt="Woora" className="logo-img" />
+            <span className="logo-text">Woora</span>
           </Link>
 
           {/* Desktop Nav */}
