@@ -53,7 +53,7 @@ export default function Navbar() {
 
   const portalLinks = currentUser ? [
     { path: '/dashboard', label: 'Dashboard' },
-    { path: '/buy-shares', label: 'Invest' },
+    ...(userData?.isActivated ? [{ path: '/buy-shares', label: 'Invest' }] : []),
   ] : [];
 
   const allLinks = [...navLinks, ...portalLinks];

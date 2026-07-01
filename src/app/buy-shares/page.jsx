@@ -30,6 +30,15 @@ export default function BuyShares() {
     }
   }, [activePayments]);
 
+  useEffect(() => {
+    if (userData !== undefined && userData !== null && !userData.isActivated) {
+      router.replace('/dashboard');
+    }
+    if (userData === null) {
+      router.replace('/login');
+    }
+  }, [userData]);
+
   const currentPM = activePayments.find(p => p.name === paymentMethod) || activePayments[0] || {};
   const displayNumber = currentPM.type === 'Cash' ? (currentPM.address || '') : (currentPM.number || '');
 
