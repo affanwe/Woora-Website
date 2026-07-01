@@ -6,6 +6,7 @@ import { AuthProvider } from '../context/AuthContext';
 import { SiteSettingsProvider } from '../context/SiteSettingsContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import LanguageSwitcher from './LanguageSwitcher';
 
 // Dynamic imports with SSR disabled for browser-dependent components
 const SmoothScroll = dynamic(() => import('./SmoothScroll'), { ssr: false });
@@ -23,6 +24,7 @@ export default function ClientWrapper({ children }) {
             {children}
           </main>
           <Footer />
+          <LanguageSwitcher />
         </div>
       </SmoothScroll>
     </AuthProvider>
