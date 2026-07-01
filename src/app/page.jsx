@@ -16,7 +16,7 @@ function AnimatedText({ text, className = '', delay = 0 }) {
   let charIndex = 0; // Track overall index for continuous delay calculation
 
   return (
-    <span className={`animated-text ${className}`} aria-label={text}>
+    <span className={`animated-text notranslate ${className}`} translate="no" aria-label={text}>
       {words.map((word, wIdx) => {
         const wordChars = word.split('');
         return (

@@ -7,7 +7,7 @@ export default function SplitHoverText({ children, as: Tag = 'span', className =
   if (!text) return <Tag className={className} {...rest}>{children}</Tag>;
 
   return (
-    <Tag className={`split-hover ${className}`} {...rest}>
+    <Tag className={`split-hover notranslate ${className}`} translate="no" {...rest}>
       {text.split('').map((char, i) => {
         if (char === ' ') {
           return <span key={i} className="split-hover-space">&nbsp;</span>;
