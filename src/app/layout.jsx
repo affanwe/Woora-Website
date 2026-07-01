@@ -20,7 +20,7 @@ import '../pages/Projects.css';
 
 export const metadata = {
   title: 'WOORA GROUP - Institutional-Grade Investment Platform',
-  description: 'Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳500 per investment unit.',
+  description: "Be part of Bangladesh's next big ventures — transparent, healthy, and built to grow. Investment units start at ৳500 only.",
 };
 
 export default function RootLayout({ children }) {

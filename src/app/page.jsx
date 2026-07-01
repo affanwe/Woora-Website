@@ -119,7 +119,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="hero-subtitle hero-animate-in" style={{ animationDelay: '2.3s' }}>
-            {homeSettings?.heroSubtitle || `Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳${sharePrice.toLocaleString()} per investment unit.`}
+            {homeSettings?.heroSubtitle || `Be part of Bangladesh's next big ventures — transparent, healthy, and built to grow. Investment units start at ৳${sharePrice.toLocaleString()} only.`}
           </p>
         </div>
 

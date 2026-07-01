@@ -24,7 +24,7 @@ const DEFAULT_COMPANY = {
 const DEFAULT_HOME = {
   heroLine1: "Let's make",
   heroLine2: 'Your dream a reality',
-  heroSubtitle: 'Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳500 per share.',
+  heroSubtitle: "Be part of Bangladesh's next big ventures — transparent, healthy, and built to grow. Investment units start at ৳500 only.",
   sharePrice: 500,
   roiDisplay: 25,
   tiers: [
@@ -62,7 +62,7 @@ const DEFAULT_FOOTER = {
   address: 'Gulshan 2, Dhaka',
   poweredBy: 'Powered by Woora Tech',
   siteTitle: 'WOORA GROUP - Institutional-Grade Investment Platform',
-  metaDescription: 'Access premium, vetted investment opportunities across Real Estate, Agriculture, and Technology. Start with just ৳500 per share.',
+  metaDescription: "Be part of Bangladesh's next big ventures — transparent, healthy, and built to grow. Investment units start at ৳500 only.",
 };
 
 const SiteSettingsContext = createContext({
