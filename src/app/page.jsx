@@ -87,12 +87,18 @@ export default function Home() {
   const { currentUser } = useAuth();
   const { home: homeSettings } = useSiteSettings();
   const sharePrice = homeSettings?.sharePrice || 500;
-  const [stats, setStats]       = useState({ active_investors: 0, total_capital: 0, active_projects: 0 });
+  const [stats, setStats]       = useState({ active_investors: 0, total_capital: 0, active_projects: 0, total_profit_distributed: 0 });
   const [featuredProjects, setFeaturedProjects] = useState([]);
 
   useEffect(() => {
     supabase.rpc('get_public_stats').then(({ data }) => {
-      if (data) setStats(data);
+      if (data) setStats(prev => ({ ...prev, ...data }));
+    });
+    supabase.from('investors').select('profit_received').then(({ data }) => {
+      if (data) {
+        const total = data.reduce((sum, inv) => sum + (inv.profit_received || 0), 0);
+        setStats(prev => ({ ...prev, total_profit_distributed: total }));
+      }
     });
     supabase.from('projects').select('id,name,category,tagline,images,status').order('created_at', { ascending: false }).limit(3)
       .then(({ data }) => { if (data) setFeaturedProjects(data); });
@@ -131,13 +137,13 @@ export default function Home() {
                 <div className="stat-icon"><Wallet size={24} /></div>
                 <div className="stat-value">
                   <AnimatedCounter
-                    key={stats.total_capital}
-                    target={Math.round(stats.total_capital / 10000000)}
+                    key={stats.total_profit_distributed}
+                    target={stats.total_profit_distributed >= 10000000 ? Math.round(stats.total_profit_distributed / 10000000) : Math.round(stats.total_profit_distributed / 100000)}
                     prefix="৳"
-                    suffix={stats.total_capital >= 10000000 ? "Cr+" : ""}
+                    suffix={stats.total_profit_distributed >= 10000000 ? "Cr+" : stats.total_profit_distributed >= 100000 ? "L+" : ""}
                   />
                 </div>
-                <div className="stat-label">Total Capital Deployed</div>
+                <div className="stat-label">Total Profit Distributed</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon text-gold"><Users size={24} /></div>
@@ -149,7 +155,7 @@ export default function Home() {
               <div className="stat-card">
                 <div className="stat-icon text-blue"><TrendingUp size={24} /></div>
                 <div className="stat-value"><AnimatedCounter target={homeSettings?.roiDisplay || 25} suffix="%" /></div>
-                <div className="stat-label">Average Annual ROI</div>
+                <div className="stat-label">Net Profit Distributed</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon text-purple"><BarChart3 size={24} /></div>
