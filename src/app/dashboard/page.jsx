@@ -1,17 +1,85 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import SplitHoverText from '../../components/SplitHoverText';
 import ScrollReveal from '../../components/ScrollReveal';
-import TiltCard from '../../components/TiltCard';
+import { supabase } from '../../lib/supabase';
 import {
   TrendingUp, Award, Clock, DollarSign, CreditCard, Copy, Check,
   User, Phone, Mail, Hash, FileText, AlertCircle, Plus, Minus,
-  BarChart3, Calendar, ArrowUpRight, Hourglass, ShieldCheck, ArrowRight, X
+  BarChart3, ArrowUpRight, Hourglass, ShieldCheck, ArrowRight, X,
+  Users, Gift, UserPlus, Wallet, Layers, Activity
 } from 'lucide-react';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
+
+/* ---- Lightweight SVG area chart (no external deps) ---- */
+function ProfitChart({ data }) {
+  // data: [{ label, value }]
+  const W = 640, H = 220, PAD_X = 42, PAD_TOP = 30, PAD_BOT = 34;
+  if (!data || data.length === 0) {
+    return (
+      <div className="chart-empty">
+        <Activity size={28} />
+        <p>Your profit trend will appear here after your first quarterly payout.</p>
+      </div>
+    );
+  }
+  const points = data.length === 1 ? [data[0], data[0]] : data;
+  const max = Math.max(...points.map(d => d.value), 1);
+  const stepX = (W - PAD_X * 2) / (points.length - 1);
+  const y = v => PAD_TOP + (1 - v / max) * (H - PAD_TOP - PAD_BOT);
+  const x = i => PAD_X + i * stepX;
+
+  // Smooth path (catmull-rom -> bezier)
+  const pts = points.map((d, i) => [x(i), y(d.value)]);
+  let path = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
+    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
+    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
+    path += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2[0]} ${p2[1]}`;
+  }
+  const areaPath = `${path} L ${pts[pts.length - 1][0]} ${H - PAD_BOT} L ${pts[0][0]} ${H - PAD_BOT} Z`;
+
+  const fmt = v => v >= 100000 ? `${(v / 100000).toFixed(1)}L` : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v;
+
+  return (
+    <div className="chart-wrap">
+      <svg viewBox={`0 0 ${W} ${H}`} className="profit-chart" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#00D09C" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#00D09C" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#00D09C" />
+            <stop offset="100%" stopColor="#4F8BFF" />
+          </linearGradient>
+        </defs>
+        {/* horizontal grid lines */}
+        {[0.25, 0.5, 0.75, 1].map((t, i) => (
+          <line key={i} x1={PAD_X} x2={W - PAD_X} y1={PAD_TOP + (1 - t) * (H - PAD_TOP - PAD_BOT)} y2={PAD_TOP + (1 - t) * (H - PAD_TOP - PAD_BOT)} stroke="rgba(148,163,199,0.08)" strokeWidth="1" />
+        ))}
+        <path d={areaPath} fill="url(#chartFill)" />
+        <path d={path} fill="none" stroke="url(#chartLine)" strokeWidth="2.5" strokeLinecap="round" />
+        {points.map((d, i) => (
+          <g key={i}>
+            <circle cx={x(i)} cy={y(d.value)} r="4.5" fill="#0C1220" stroke="#00D09C" strokeWidth="2.5" />
+            <text x={x(i)} y={y(d.value) - 12} textAnchor="middle" className="chart-val">৳{fmt(d.value)}</text>
+            <text x={x(i)} y={H - 10} textAnchor="middle" className="chart-lbl">{d.label}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { userData, profitData, returnPayments, shareRequests, requestSellShares } = useAuth();
@@ -19,6 +87,8 @@ export default function Dashboard() {
   const sharePrice = homeSettings?.sharePrice || 500;
   const [copied, setCopied] = useState(false);
   const [referralLink, setReferralLink] = useState('');
+  const [referralCount, setReferralCount] = useState(0);
+  const [referrerName, setReferrerName] = useState('');
   const [showSellModal, setShowSellModal] = useState(false);
   const [sellUnits, setSellUnits] = useState(1);
   const [sellLoading, setSellLoading] = useState(false);
@@ -29,7 +99,6 @@ export default function Dashboard() {
   const investedAmount = (userData?.shares || 0) * sharePrice;
   const totalProfit = profitData?.totalProfit || 0;
   const pendingProfit = profitData?.pendingProfit || 0;
-  const thisMonthProfit = profitData?.thisMonthProfit || 0;
   const freeUnits = userData?.awardedFreeShares || 0;
   const hasActiveInvestment = userData?.investments?.some(inv => inv.status === 'Active');
   const accountStatus = hasActiveInvestment || (userData?.shares || 0) > 0 ? 'Active' : 'Pending';
@@ -40,11 +109,65 @@ export default function Dashboard() {
 
   const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+  // This quarter's profit (returns are distributed quarterly)
+  const thisQuarterProfit = useMemo(() => {
+    const now = new Date();
+    const q = Math.floor(now.getMonth() / 3);
+    return (returnPayments || [])
+      .filter(p => p.year === now.getFullYear() && Math.floor(((p.month || 1) - 1) / 3) === q)
+      .reduce((s, p) => s + (p.amount || 0), 0);
+  }, [returnPayments]);
+
+  // Quarterly chart data (group payouts into quarters, ascending)
+  const chartData = useMemo(() => {
+    const map = new Map();
+    (returnPayments || []).forEach(p => {
+      const q = Math.floor(((p.month || 1) - 1) / 3) + 1;
+      const key = `${p.year}-${q}`;
+      map.set(key, (map.get(key) || 0) + (p.amount || 0));
+    });
+    return [...map.entries()]
+      .map(([key, value]) => {
+        const [yr, q] = key.split('-');
+        return { year: +yr, q: +q, label: `Q${q} '${String(yr).slice(2)}`, value };
+      })
+      .sort((a, b) => a.year - b.year || a.q - b.q)
+      .slice(-8);
+  }, [returnPayments]);
+
+  // Trend vs previous quarter
+  const trendPct = useMemo(() => {
+    if (chartData.length < 2) return null;
+    const prev = chartData[chartData.length - 2].value;
+    const cur = chartData[chartData.length - 1].value;
+    if (!prev) return null;
+    return Math.round(((cur - prev) / prev) * 100);
+  }, [chartData]);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setReferralLink(`${window.location.origin}/register?ref=${userData?.id || '1001'}`);
     }
   }, [userData]);
+
+  // Real referral count + who referred this investor
+  useEffect(() => {
+    const id = userData?.id;
+    if (!id || String(id).startsWith('pending_')) return;
+    supabase
+      .from('investors')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', id)
+      .then(({ count }) => setReferralCount(count || 0));
+    if (userData?.referredBy) {
+      supabase
+        .from('investors')
+        .select('name')
+        .eq('id', userData.referredBy)
+        .maybeSingle()
+        .then(({ data }) => setReferrerName(data?.name || `Investor #${userData.referredBy}`));
+    }
+  }, [userData?.id, userData?.referredBy]);
 
   const handleCopyLink = () => {
     if (referralLink) {
@@ -144,22 +267,34 @@ export default function Dashboard() {
     );
   }
 
+  const metricCards = [
+    { icon: Layers, tone: 'emerald', value: totalUnits.toLocaleString(), label: 'Total Investment Units', hint: freeUnits > 0 ? `incl. ${freeUnits} free` : null },
+    { icon: Wallet, tone: 'gold', value: `৳${investedAmount.toLocaleString()}`, label: 'Capital Invested', hint: null },
+    { icon: TrendingUp, tone: 'blue', value: `৳${totalProfit.toLocaleString()}`, label: 'Total Profit Earned', hint: trendPct !== null ? `${trendPct >= 0 ? '+' : ''}${trendPct}% vs last quarter` : null, hintTone: trendPct !== null && trendPct < 0 ? 'down' : 'up' },
+    { icon: ShieldCheck, tone: accountStatus === 'Active' ? 'emerald' : 'warning', value: accountStatus, label: 'Account Status', isBadge: true },
+  ];
+
   return (
     <div className="dashboard-page">
       <div className="container dashboard-content">
         {/* Header */}
         <ScrollReveal>
           <header className="dash-header">
-            <div>
-              <h1>Welcome, <span className="gradient-text">{userData?.name || 'Investor'}</span></h1>
-              <p className="dash-sub">Your investment overview and portfolio tracker.</p>
+            <div className="dash-header-id">
+              <div className="dash-avatar">{(userData?.name || 'I').charAt(0).toUpperCase()}</div>
+              <div>
+                <h1>Welcome, <span className="gradient-text">{userData?.name || 'Investor'}</span></h1>
+                <p className="dash-sub">
+                  Investor ID <span className="dash-id-chip">#{(userData?.id && !String(userData.id).startsWith('pending_')) ? userData.id : '—'}</span> · Your portfolio at a glance
+                </p>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               <Link href="/buy-shares" className="btn btn-primary">
                 <Plus size={16} /> <SplitHoverText>Buy Investment Units</SplitHoverText>
               </Link>
               {(userData?.shares || 0) > 0 && (
-                <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary" style={{ borderColor: '#EF4444', color: '#EF4444' }}>
+                <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary btn-sell">
                   <Minus size={16} /> <SplitHoverText>Sell Units</SplitHoverText>
                 </button>
               )}
@@ -170,72 +305,69 @@ export default function Dashboard() {
         {/* Metrics */}
         <ScrollReveal delay={0.1}>
           <div className="metrics-row">
-            <TiltCard className="metric-tile">
-              <div className="metric-tile-inner">
-                <TrendingUp size={20} className="metric-icon text-emerald" />
-                <span className="metric-val">{totalUnits}</span>
-                <span className="metric-lbl">Total Investment Units</span>
+            {metricCards.map(({ icon: Icon, tone, value, label, hint, hintTone, isBadge }, i) => (
+              <div className={`metric-tile glass-panel tone-${tone}`} key={i}>
+                <div className="metric-tile-inner">
+                  <div className="metric-top">
+                    <span className={`metric-icon-chip chip-${tone}`}><Icon size={18} /></span>
+                    {hint && <span className={`metric-hint ${hintTone === 'down' ? 'hint-down' : 'hint-up'}`}>{hint}</span>}
+                  </div>
+                  {isBadge ? (
+                    <span className={`badge badge-${String(value).toLowerCase()} metric-badge`}>{value}</span>
+                  ) : (
+                    <span className="metric-val">{value}</span>
+                  )}
+                  <span className="metric-lbl">{label}</span>
+                </div>
               </div>
-            </TiltCard>
-            <TiltCard className="metric-tile">
-              <div className="metric-tile-inner">
-                <DollarSign size={20} className="metric-icon text-gold" />
-                <span className="metric-val">৳{investedAmount.toLocaleString()}</span>
-                <span className="metric-lbl">Capital Invested</span>
-              </div>
-            </TiltCard>
-            <TiltCard className="metric-tile">
-              <div className="metric-tile-inner">
-                <Award size={20} className="metric-icon text-blue" />
-                <span className="metric-val">৳{totalProfit.toLocaleString()}</span>
-                <span className="metric-lbl">Total Profit Earned</span>
-              </div>
-            </TiltCard>
-            <TiltCard className="metric-tile">
-              <div className="metric-tile-inner">
-                <Clock size={20} className="metric-icon text-warning" />
-                <span className={`badge badge-${accountStatus.toLowerCase()}`}>{accountStatus}</span>
-                <span className="metric-lbl">Account Status</span>
-              </div>
-            </TiltCard>
+            ))}
           </div>
         </ScrollReveal>
 
-        {/* Profit Section */}
+        {/* Profit Overview — chart + quick stats */}
         <ScrollReveal delay={0.15}>
           <div className="dash-card glass-panel" style={{ marginBottom: '1.5rem' }}>
             <div className="dash-card-header">
-              <h3><BarChart3 size={18} /> Profit Overview</h3>
+              <h3><span className="card-icon-chip"><BarChart3 size={16} /></span> Profit Overview</h3>
+              {trendPct !== null && (
+                <span className={`trend-pill ${trendPct < 0 ? 'trend-down' : 'trend-up'}`}>
+                  <ArrowUpRight size={13} style={trendPct < 0 ? { transform: 'rotate(90deg)' } : undefined} />
+                  {trendPct >= 0 ? '+' : ''}{trendPct}% this quarter
+                </span>
+              )}
             </div>
-            <div className="metrics-row" style={{ marginBottom: '1rem' }}>
-              <div className="metric-mini">
-                <ArrowUpRight size={16} className="text-emerald" />
-                <div>
-                  <span className="metric-mini-val">৳{totalProfit.toLocaleString()}</span>
-                  <span className="metric-mini-lbl">Total Earned</span>
+            <div className="profit-grid">
+              <ProfitChart data={chartData} />
+              <div className="profit-side-stats">
+                <div className="pstat">
+                  <span className="pstat-icon icon-emerald"><ArrowUpRight size={15} /></span>
+                  <div>
+                    <span className="pstat-val">৳{totalProfit.toLocaleString()}</span>
+                    <span className="pstat-lbl">Total Earned</span>
+                  </div>
                 </div>
-              </div>
-              <div className="metric-mini">
-                <Calendar size={16} className="text-blue" />
-                <div>
-                  <span className="metric-mini-val">৳{thisMonthProfit.toLocaleString()}</span>
-                  <span className="metric-mini-lbl">This Month</span>
+                <div className="pstat">
+                  <span className="pstat-icon icon-blue"><BarChart3 size={15} /></span>
+                  <div>
+                    <span className="pstat-val">৳{thisQuarterProfit.toLocaleString()}</span>
+                    <span className="pstat-lbl">This Quarter</span>
+                  </div>
                 </div>
-              </div>
-              <div className="metric-mini">
-                <Hourglass size={16} className="text-warning" />
-                <div>
-                  <span className="metric-mini-val">৳{pendingProfit.toLocaleString()}</span>
-                  <span className="metric-mini-lbl">Pending</span>
+                <div className="pstat">
+                  <span className="pstat-icon icon-warning"><Hourglass size={15} /></span>
+                  <div>
+                    <span className="pstat-val">৳{pendingProfit.toLocaleString()}</span>
+                    <span className="pstat-lbl">Pending Payout</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="table-wrap">
+            <div className="table-wrap" style={{ marginTop: '18px' }}>
               {profitHistory.length > 0 ? (
                 <table className="inv-table">
                   <thead>
                     <tr>
-                      <th>Month</th>
+                      <th>Period</th>
                       <th>Amount</th>
                       <th>Status</th>
                     </tr>
@@ -257,7 +389,7 @@ export default function Dashboard() {
               ) : (
                 <div className="empty-box text-center" style={{ padding: '1.5rem' }}>
                   <DollarSign size={28} />
-                  <p style={{ margin: '0.5rem 0 0', opacity: 0.7 }}>No profit records yet. Returns are distributed monthly.</p>
+                  <p style={{ margin: '0.5rem 0 0', opacity: 0.7 }}>No profit records yet. Returns are distributed quarterly.</p>
                 </div>
               )}
             </div>
@@ -269,7 +401,7 @@ export default function Dashboard() {
           <ScrollReveal delay={0.2}>
             <div className="dash-card glass-panel" style={{ marginBottom: '1.5rem' }}>
               <div className="dash-card-header">
-                <h3><Clock size={18} /> Investment Unit Request Status</h3>
+                <h3><span className="card-icon-chip"><Clock size={16} /></span> Investment Unit Request Status</h3>
                 {pendingRequests.length > 0 && (
                   <span className="badge badge-pending">{pendingRequests.length} Pending</span>
                 )}
@@ -312,7 +444,7 @@ export default function Dashboard() {
           <ScrollReveal>
             <div className="dash-card glass-panel">
               <div className="dash-card-header">
-                <h3><CreditCard size={18} /> My Investments</h3>
+                <h3><span className="card-icon-chip"><CreditCard size={16} /></span> My Investments</h3>
               </div>
               <div className="table-wrap">
                 {userData?.investments?.length > 0 ? (
@@ -358,15 +490,49 @@ export default function Dashboard() {
 
           {/* Side Column */}
           <div className="dash-side">
-            {/* Profile */}
+            {/* Referral — redesigned */}
             <ScrollReveal delay={0.1}>
+              <div className="dash-card glass-panel ref-card">
+                <div className="dash-card-header">
+                  <h3><span className="card-icon-chip chip-gold-bg"><Gift size={16} /></span> Referral Program</h3>
+                </div>
+                <p className="ref-tagline">Invite friends & earn free investment units when they join.</p>
+                <div className="ref-stats">
+                  <div className="ref-stat-box">
+                    <Users size={16} className="ref-stat-icon" />
+                    <span className="ref-num">{referralCount}</span>
+                    <span className="ref-label">People Referred</span>
+                  </div>
+                  <div className="ref-stat-box">
+                    <Gift size={16} className="ref-stat-icon gold" />
+                    <span className="ref-num gold">{freeUnits}</span>
+                    <span className="ref-label">Free Units Earned</span>
+                  </div>
+                </div>
+                <div className="ref-link-row">
+                  <input type="text" readOnly value={referralLink} className="form-control ref-input" />
+                  <button className="btn btn-primary btn-copy" onClick={handleCopyLink}>
+                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                  </button>
+                </div>
+                {userData?.referredBy && (
+                  <div className="ref-by-row">
+                    <UserPlus size={14} />
+                    <span>Referred by <strong>{referrerName || `Investor #${userData.referredBy}`}</strong></span>
+                  </div>
+                )}
+              </div>
+            </ScrollReveal>
+
+            {/* Profile */}
+            <ScrollReveal delay={0.2}>
               <div className="dash-card glass-panel">
                 <div className="dash-card-header">
-                  <h3><User size={18} /> Profile</h3>
+                  <h3><span className="card-icon-chip"><User size={16} /></span> Profile</h3>
                 </div>
                 <div className="profile-rows">
                   {[
-                    { icon: Hash, label: 'Investor ID', value: (userData?.id && !userData.id.startsWith('pending_')) ? userData.id : 'Assigned on activation' },
+                    { icon: Hash, label: 'Investor ID', value: (userData?.id && !String(userData.id).startsWith('pending_')) ? userData.id : 'Assigned on activation' },
                     { icon: User, label: 'Name', value: userData?.name || 'N/A' },
                     { icon: Mail, label: 'Email', value: userData?.email || 'N/A' },
                     { icon: Phone, label: 'Mobile', value: userData?.mobile || 'N/A' },
@@ -380,31 +546,6 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Referral */}
-            <ScrollReveal delay={0.2}>
-              <div className="dash-card glass-panel">
-                <div className="dash-card-header">
-                  <h3><Award size={18} className="text-gold" /> Referrals</h3>
-                </div>
-                <div className="ref-stats">
-                  <div className="ref-stat-box">
-                    <span className="ref-num">{userData?.referralCount || 0}</span>
-                    <span className="ref-label">Referred</span>
-                  </div>
-                  <div className="ref-stat-box">
-                    <span className="ref-num">{freeUnits}</span>
-                    <span className="ref-label">Free Units</span>
-                  </div>
-                </div>
-                <div className="ref-link-row">
-                  <input type="text" readOnly value={referralLink} className="form-control ref-input" />
-                  <button className="btn btn-primary btn-copy" onClick={handleCopyLink}>
-                    {copied ? <Check size={16} /> : <Copy size={16} />}
-                  </button>
                 </div>
               </div>
             </ScrollReveal>
