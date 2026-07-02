@@ -281,7 +281,13 @@ export default function Dashboard() {
         <ScrollReveal>
           <header className="dash-header">
             <div className="dash-header-id">
-              <div className="dash-avatar">{(userData?.name || 'I').charAt(0).toUpperCase()}</div>
+              <div className="dash-avatar">
+                {userData?.image ? (
+                  <img src={userData.image} alt={userData?.name || 'Investor'} className="dash-avatar-img" />
+                ) : (
+                  (userData?.name || 'I').charAt(0).toUpperCase()
+                )}
+              </div>
               <div>
                 <h1>Welcome, <span className="gradient-text">{userData?.name || 'Investor'}</span></h1>
                 <p className="dash-sub">
