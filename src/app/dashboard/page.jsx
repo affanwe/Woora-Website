@@ -167,7 +167,7 @@ export default function Dashboard() {
         .maybeSingle()
         .then(({ data }) => setReferrerName(data?.name || `Investor #${userData.referredBy}`));
     }
-  }, [userData?.id, userData?.referredBy]);
+  }, [userData]);
 
   const handleCopyLink = () => {
     if (referralLink) {
