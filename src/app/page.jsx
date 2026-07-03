@@ -83,7 +83,7 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
 }
 
 // Animated company growth line chart (pure SVG, draws in on scroll)
-function GrowthChart({ totalProfit, ctaHref }) {
+function GrowthChart({ series, total, ctaHref }) {
   const [visible, setVisible] = useState(false);
   const wrapRef = useRef(null);
 
@@ -98,11 +98,23 @@ function GrowthChart({ totalProfit, ctaHref }) {
 
   const W = 560, H = 300, PAD_X = 30, PAD_TOP = 30, PAD_BOT = 42;
 
-  // Brand growth trajectory (relative scale) + softer baseline like the reference
-  const main = [12, 30, 24, 48, 42, 70, 96];
-  const base = [8, 14, 22, 18, 30, 26, 40];
-  const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
-  const max = 100;
+  // Real cumulative profit curve from admin PnL records; brand placeholder until data exists
+  const hasData = Array.isArray(series) && series.length >= 2;
+  let main, labels;
+  if (hasData) {
+    let running = 0;
+    const cumulative = series.map(p => {
+      running += Number(p.net_profit) || 0;
+      return { label: `${String(p.month).slice(0, 3)} '${String(p.year).slice(2)}`, value: running };
+    }).slice(-8);
+    main = cumulative.map(p => p.value);
+    labels = cumulative.map(p => p.label);
+  } else {
+    main = [12, 30, 24, 48, 42, 70, 96];
+    labels = ["Jan '26", "Feb '26", "Mar '26", "Apr '26", "May '26", "Jun '26", "Jul '26"];
+  }
+  const base = main.map(v => v * 0.45);
+  const max = Math.max(...main, 1) * 1.1;
 
   const toPts = (arr) => arr.map((v, i) => [
     PAD_X + (i * (W - PAD_X * 2)) / (arr.length - 1),
@@ -133,12 +145,12 @@ function GrowthChart({ totalProfit, ctaHref }) {
           <span className="growth-eyebrow">Company Growth</span>
           <div className="growth-big">
             <AnimatedCounter
-              key={totalProfit}
-              target={totalProfit}
+              key={total}
+              target={Math.round(total)}
               prefix="৳"
             />
           </div>
-          <span className="growth-sub">Total Profit Distributed</span>
+          <span className="growth-sub">Total Profit Earned</span>
         </div>
         <span className="growth-pill"><TrendingUp size={13} /> Growing</span>
       </div>
@@ -180,7 +192,7 @@ function GrowthChart({ totalProfit, ctaHref }) {
 
         {/* month labels */}
         {mainPts.map(([x], i) => (
-          <text key={i} x={x} y={H - 14} textAnchor="middle" className="gc-label">{labels[i]} '26</text>
+          <text key={i} x={x} y={H - 14} textAnchor="middle" className="gc-label">{labels[i]}</text>
         ))}
       </svg>
 
@@ -198,6 +210,7 @@ export default function Home() {
   const sharePrice = homeSettings?.sharePrice || 500;
   const [stats, setStats]       = useState({ active_investors: 0, total_capital: 0, active_projects: 0, total_profit_distributed: 0 });
   const [featuredProjects, setFeaturedProjects] = useState([]);
+  const [profitSeries, setProfitSeries] = useState({ series: [], total: 0 });
 
   useEffect(() => {
     supabase.rpc('get_public_stats').then(({ data }) => {
@@ -211,6 +224,20 @@ export default function Home() {
     });
     supabase.from('projects').select('id,name,category,tagline,images,status').order('created_at', { ascending: false }).limit(3)
       .then(({ data }) => { if (data) setFeaturedProjects(data); });
+
+    // Company profit series (total profit earned) + realtime updates from admin PnL
+    const fetchProfitSeries = () => {
+      supabase.from('public_profit_series').select('series,total').eq('id', 'main').maybeSingle()
+        .then(({ data }) => {
+          if (data) setProfitSeries({ series: data.series || [], total: Number(data.total) || 0 });
+        });
+    };
+    fetchProfitSeries();
+    const channel = supabase
+      .channel('public-profit-series')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'public_profit_series' }, fetchProfitSeries)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   return (
@@ -369,7 +396,8 @@ export default function Home() {
 
           <ScrollReveal delay={0.2}>
             <GrowthChart
-              totalProfit={stats.total_profit_distributed}
+              series={profitSeries.series}
+              total={profitSeries.total}
               ctaHref={currentUser ? '/buy-shares' : '/register'}
             />
           </ScrollReveal>
