@@ -99,7 +99,7 @@ export default function ProjectDetail() {
         {images.length > 0 && (
           <ScrollReveal>
             <div style={{ marginBottom: '48px' }}>
-              <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16/7', background: 'var(--color-surface)', marginBottom: '12px' }}>
+              <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16/9', background: 'var(--color-surface)', marginBottom: '12px' }}>
                 <img src={images[activeImg]} alt={project.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 {images.length > 1 && (
                   <>

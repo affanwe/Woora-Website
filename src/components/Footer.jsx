@@ -15,8 +15,7 @@ export default function Footer() {
       <div className="container footer-top">
         <div className="footer-brand">
           <Link href="/" className="footer-logo">
-            <span className="logo-mark">W</span>
-            <span className="logo-text">WOORA GROUP</span>
+            <span className="footer-brand-text">WOORA GROUP</span>
           </Link>
           <p className="footer-desc">
             {footer.description}

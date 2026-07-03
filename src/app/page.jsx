@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import SplitHoverText from '../components/SplitHoverText';
 import ScrollReveal from '../components/ScrollReveal';
 import { supabase } from '../lib/supabase';
-import { ArrowRight, TrendingUp, Users, Wallet, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
+import { ArrowRight, TrendingUp, Users, Wallet, Zap, BarChart3 } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
 
 // Animated character reveal — each character appears one at a time, wrapping at word boundaries
@@ -364,29 +364,6 @@ export default function Home() {
                 We fractionalize premium assets into affordable investment units so that anyone can invest. No complex paperwork — just choose your unit count, pay, and let your money grow.
               </p>
 
-              <div className="features-stack">
-                <div className="feature-row">
-                  <div className="feature-icon-circle"><ShieldCheck size={18} /></div>
-                  <div>
-                    <h4>৳{sharePrice.toLocaleString()} Per Investment Unit</h4>
-                    <p>Start investing with as little as one investment unit. Build your portfolio over time.</p>
-                  </div>
-                </div>
-                <div className="feature-row">
-                  <div className="feature-icon-circle"><ShieldCheck size={18} /></div>
-                  <div>
-                    <h4>Mobile Banking Payments</h4>
-                    <p>Pay via bKash, Nagad, Rocket, or cash deposit. Quick request submission.</p>
-                  </div>
-                </div>
-                <div className="feature-row">
-                  <div className="feature-icon-circle"><ShieldCheck size={18} /></div>
-                  <div>
-                    <h4>Admin-Verified Transactions</h4>
-                    <p>Every purchase is audited and verified by our finance team before activation.</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </ScrollReveal>
 
