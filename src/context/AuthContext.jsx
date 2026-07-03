@@ -191,7 +191,7 @@ export function AuthProvider({ children }) {
         .order('date_requested', { ascending: false });
 
       setShareRequests((requests || []).map(r => ({
-        docId: r.id, id: r.id, investorId: r.investor_id, investorName: r.investor_name,
+        docId: r.id, id: r.id, orderId: r.order_id, investorId: r.investor_id, investorName: r.investor_name,
         sharesCount: r.shares_count, amount: r.amount,
         paymentMethod: r.payment_method, trxId: r.trx_id,
         status: r.status, rejectReason: r.reject_reason,

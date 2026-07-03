@@ -20,6 +20,7 @@ export default function BuyShares() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [orderId, setOrderId] = useState('');
   const [copiedNum, setCopiedNum] = useState(false);
   const router = useRouter();
   const sharesNum = parseInt(sharesCount) || 0;
@@ -57,7 +58,8 @@ export default function BuyShares() {
     if (!trxId.trim()) return setError('Enter the Transaction ID or Reference.');
     try {
       setLoading(true);
-      await requestShares(sharesNum, paymentMethod, trxId.trim());
+      const result = await requestShares(sharesNum, paymentMethod, trxId.trim());
+      setOrderId(result?.order_id || '');
       setSuccess(true);
     } catch (err) {
       setError(err.message || 'Failed to submit. Try again.');
@@ -78,6 +80,7 @@ export default function BuyShares() {
                 Your request to purchase <strong>{sharesNum} investment units</strong> (৳{amount.toLocaleString()}) via <strong>{paymentMethod}</strong> has been submitted.
               </p>
               <div className="success-detail">
+                {orderId && <p><strong>Order ID:</strong> <code style={{ color: 'var(--gold)', fontWeight: 700 }}>{orderId}</code></p>}
                 <p><strong>TrxID:</strong> <code>{trxId}</code></p>
                 <p><strong>Status:</strong> <span className="badge badge-pending">Pending Review</span></p>
               </div>
@@ -220,6 +223,7 @@ export default function BuyShares() {
                 <table className="inv-table">
                   <thead>
                     <tr>
+                      <th>Order ID</th>
                       <th>Date</th>
                       <th>Units</th>
                       <th>Amount</th>
@@ -231,6 +235,7 @@ export default function BuyShares() {
                   <tbody>
                     {shareRequests.map((req, idx) => (
                       <tr key={idx}>
+                        <td><code className="trx-code" style={{ color: 'var(--gold)', fontWeight: 600 }}>{req.orderId || '—'}</code></td>
                         <td>{req.dateRequested ? new Date(req.dateRequested).toLocaleDateString() : 'N/A'}</td>
                         <td className="fw-600">{req.sharesCount}</td>
                         <td className="fw-700">৳{(req.amount || 0).toLocaleString()}</td>
