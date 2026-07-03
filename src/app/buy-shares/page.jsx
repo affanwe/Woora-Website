@@ -118,10 +118,15 @@ export default function BuyShares() {
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label className="form-label">Number of Investment Units (৳{sharePrice.toLocaleString()} / Unit)</label>
-                  <input type="tel" inputMode="numeric" pattern="[0-9]*" className="form-control" value={sharesCount}
-                    onChange={(e) => setSharesCount(e.target.value.replace(/[^0-9]/g, ''))}
-                    onBlur={() => { if (!sharesCount || parseInt(sharesCount) < 1) setSharesCount('1'); }}
-                    onFocus={(e) => e.target.select()} required />
+                  <input type="text" inputMode="numeric" pattern="[0-9]*" className="form-control"
+                    value={sharesCount}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/[^0-9]/g, '');
+                      setSharesCount(v);
+                    }}
+                    onBlur={() => { const n = parseInt(sharesCount); if (!n || n < 1) setSharesCount('1'); }}
+                    onFocus={(e) => e.target.select()}
+                    required />
                 </div>
 
                 <div className="form-group">
