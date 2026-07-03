@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import SplitHoverText from '../components/SplitHoverText';
 import ScrollReveal from '../components/ScrollReveal';
-import TiltCard from '../components/TiltCard';
 import { supabase } from '../lib/supabase';
 import { ArrowRight, TrendingUp, Users, Wallet, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
 import { useSiteSettings } from '../context/SiteSettingsContext';
@@ -81,6 +80,116 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
   }, [target]);
 
   return <span ref={ref}>{prefix}{count.toLocaleString()}{suffix}</span>;
+}
+
+// Animated company growth line chart (pure SVG, draws in on scroll)
+function GrowthChart({ totalProfit, ctaHref }) {
+  const [visible, setVisible] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
+      { threshold: 0.35 }
+    );
+    if (wrapRef.current) observer.observe(wrapRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const W = 560, H = 300, PAD_X = 30, PAD_TOP = 30, PAD_BOT = 42;
+
+  // Brand growth trajectory (relative scale) + softer baseline like the reference
+  const main = [12, 30, 24, 48, 42, 70, 96];
+  const base = [8, 14, 22, 18, 30, 26, 40];
+  const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+  const max = 100;
+
+  const toPts = (arr) => arr.map((v, i) => [
+    PAD_X + (i * (W - PAD_X * 2)) / (arr.length - 1),
+    PAD_TOP + (1 - v / max) * (H - PAD_TOP - PAD_BOT),
+  ]);
+
+  const smoothPath = (pts) => {
+    let d = `M ${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[i + 2] || p2;
+      d += ` C ${p1[0] + (p2[0] - p0[0]) / 6} ${p1[1] + (p2[1] - p0[1]) / 6}, ${p2[0] - (p3[0] - p1[0]) / 6} ${p2[1] - (p3[1] - p1[1]) / 6}, ${p2[0]} ${p2[1]}`;
+    }
+    return d;
+  };
+
+  const mainPts = toPts(main);
+  const basePts = toPts(base);
+  const mainPath = smoothPath(mainPts);
+  const areaPath = `${mainPath} L ${mainPts[mainPts.length - 1][0]} ${H - PAD_BOT} L ${mainPts[0][0]} ${H - PAD_BOT} Z`;
+
+  return (
+    <div ref={wrapRef} className={`growth-card glass-panel${visible ? ' is-visible' : ''}`}>
+      <div className="growth-head">
+        <div>
+          <span className="growth-eyebrow">Company Growth</span>
+          <div className="growth-big">
+            <AnimatedCounter
+              key={totalProfit}
+              target={totalProfit}
+              prefix="৳"
+            />
+          </div>
+          <span className="growth-sub">Total Profit Distributed</span>
+        </div>
+        <span className="growth-pill"><TrendingUp size={13} /> Growing</span>
+      </div>
+
+      <svg viewBox={`0 0 ${W} ${H}`} className="growth-chart" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gcLine" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#00D09C" />
+            <stop offset="100%" stopColor="#4F8BFF" />
+          </linearGradient>
+          <linearGradient id="gcFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#00D09C" stopOpacity="0.30" />
+            <stop offset="100%" stopColor="#00D09C" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {/* grid lines */}
+        {[0.25, 0.5, 0.75].map((t, i) => (
+          <line
+            key={i}
+            x1={PAD_X} x2={W - PAD_X}
+            y1={PAD_TOP + (1 - t) * (H - PAD_TOP - PAD_BOT)}
+            y2={PAD_TOP + (1 - t) * (H - PAD_TOP - PAD_BOT)}
+            stroke="rgba(148,163,199,0.08)"
+          />
+        ))}
+
+        {/* dashed baseline (last period) */}
+        <path d={smoothPath(basePts)} className="gc-baseline" fill="none" />
+
+        {/* gradient area + main line */}
+        <path d={areaPath} className="gc-area" fill="url(#gcFill)" />
+        <path d={mainPath} className="gc-line" fill="none" stroke="url(#gcLine)" strokeWidth="3" strokeLinecap="round" />
+
+        {/* dots */}
+        {mainPts.map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r="5" className="gc-dot" style={{ transitionDelay: `${1.1 + i * 0.12}s` }} />
+        ))}
+
+        {/* month labels */}
+        {mainPts.map(([x], i) => (
+          <text key={i} x={x} y={H - 14} textAnchor="middle" className="gc-label">{labels[i]} '26</text>
+        ))}
+      </svg>
+
+      <Link href={ctaHref} className="btn btn-primary btn-block" style={{ marginTop: '20px' }}>
+        <SplitHoverText>Start Investing</SplitHoverText>
+        <ArrowRight size={16} />
+      </Link>
+    </div>
+  );
 }
 
 export default function Home() {
@@ -259,31 +368,10 @@ export default function Home() {
           </ScrollReveal>
 
           <ScrollReveal delay={0.2}>
-            <TiltCard className="pricing-card glass-panel">
-              <div className="pricing-card-inner">
-                <h3 className="pricing-title">Investment Unit Pricing</h3>
-                <div className="pricing-big">
-                  <span className="pricing-currency">৳</span>
-                  <span className="pricing-amount">{sharePrice.toLocaleString()}</span>
-                  <span className="pricing-per">/ unit</span>
-                </div>
-
-                <div className="pricing-tiers">
-                  {(homeSettings?.tiers || []).map((tier, idx) => (
-                    <div key={idx} className={`tier${idx === 1 ? ' is-highlighted' : ''}`}>
-                      <span className="tier-label">{tier.name}</span>
-                      <span className="tier-shares">{tier.shares.toLocaleString()} Units</span>
-                      <span className="tier-cost">৳{tier.cost.toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link href={currentUser ? '/buy-shares' : '/register'} className="btn btn-primary btn-block">
-                  <SplitHoverText>Start Investing</SplitHoverText>
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-            </TiltCard>
+            <GrowthChart
+              totalProfit={stats.total_profit_distributed}
+              ctaHref={currentUser ? '/buy-shares' : '/register'}
+            />
           </ScrollReveal>
         </div>
       </section>
