@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Globe } from 'lucide-react';
 
 const languages = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -66,7 +65,6 @@ export default function LanguageSwitcher() {
 
   return (
     <>
-      {/* Hidden Google Translate element */}
       <div id="google_translate_element" style={{ display: 'none', position: 'absolute', visibility: 'hidden' }} />
 
       <div ref={ref} className="lang-switcher">
@@ -77,10 +75,6 @@ export default function LanguageSwitcher() {
           aria-label="Change language"
         >
           <span className="lang-flag">{currentLang.flag}</span>
-          <span className="lang-code">{currentLang.code.toUpperCase()}</span>
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className={`lang-chevron ${open ? 'lang-chevron--open' : ''}`}>
-            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
         </button>
 
         {open && (
@@ -115,34 +109,32 @@ export default function LanguageSwitcher() {
         .lang-switcher-btn {
           display: flex;
           align-items: center;
-          gap: 6px;
-          padding: 10px 14px;
-          background: rgba(15, 15, 30, 0.92);
+          justify-content: center;
+          width: 48px;
+          height: 48px;
+          padding: 0;
+          background: rgba(15, 15, 30, 0.85);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 50%;
           color: #fff;
-          font-size: 13px;
-          font-weight: 600;
           cursor: pointer;
           transition: all 0.25s ease;
           box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .lang-switcher-btn:hover {
           border-color: rgba(0,208,156,0.4);
-          box-shadow: 0 4px 24px rgba(0,208,156,0.15);
+          box-shadow: 0 4px 24px rgba(0,208,156,0.2);
+          transform: scale(1.08);
         }
-        .lang-flag { font-size: 18px; line-height: 1; }
-        .lang-code { letter-spacing: 0.5px; }
-        .lang-chevron {
-          transition: transform 0.2s ease;
-          opacity: 0.6;
+        .lang-switcher-btn .lang-flag {
+          font-size: 24px;
+          line-height: 1;
         }
-        .lang-chevron--open { transform: rotate(180deg); }
         .lang-dropdown {
           position: absolute;
-          bottom: calc(100% + 8px);
+          bottom: calc(100% + 10px);
           left: 0;
           min-width: 170px;
           background: rgba(15, 15, 30, 0.96);
@@ -172,6 +164,10 @@ export default function LanguageSwitcher() {
           cursor: pointer;
           transition: all 0.15s ease;
         }
+        .lang-option .lang-flag {
+          font-size: 20px;
+          line-height: 1;
+        }
         .lang-option:hover {
           background: rgba(255,255,255,0.06);
           color: #fff;
@@ -182,7 +178,6 @@ export default function LanguageSwitcher() {
         }
         .lang-option-label { flex: 1; text-align: left; }
 
-        /* Hide Google Translate bar and branding */
         .goog-te-banner-frame, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame {
           display: none !important;
         }
@@ -195,8 +190,11 @@ export default function LanguageSwitcher() {
             left: 16px;
           }
           .lang-switcher-btn {
-            padding: 8px 12px;
-            font-size: 12px;
+            width: 44px;
+            height: 44px;
+          }
+          .lang-switcher-btn .lang-flag {
+            font-size: 22px;
           }
         }
       `}</style>
