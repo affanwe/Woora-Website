@@ -83,7 +83,7 @@ function AnimatedCounter({ target, suffix = '', prefix = '' }) {
 }
 
 // Animated company growth line chart (pure SVG, draws in on scroll)
-function GrowthChart({ series, total, ctaHref }) {
+function GrowthChart({ series, total }) {
   const [visible, setVisible] = useState(false);
   const wrapRef = useRef(null);
 
@@ -196,10 +196,6 @@ function GrowthChart({ series, total, ctaHref }) {
         ))}
       </svg>
 
-      <Link href={ctaHref} className="btn btn-primary btn-block" style={{ marginTop: '20px' }}>
-        <SplitHoverText>Start Investing</SplitHoverText>
-        <ArrowRight size={16} />
-      </Link>
     </div>
   );
 }
@@ -398,7 +394,6 @@ export default function Home() {
             <GrowthChart
               series={profitSeries.series}
               total={profitSeries.total}
-              ctaHref={currentUser ? '/buy-shares' : '/register'}
             />
           </ScrollReveal>
         </div>
