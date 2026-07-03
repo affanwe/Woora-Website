@@ -14,7 +14,7 @@ export default function BuyShares() {
   const activePayments = (allPaymentMethods || []).filter(p => p.active);
   const sharePrice = home?.sharePrice || 500;
 
-  const [sharesCount, setSharesCount] = useState(10);
+  const [sharesCount, setSharesCount] = useState('1');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [trxId, setTrxId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,8 @@ export default function BuyShares() {
   const [success, setSuccess] = useState(false);
   const [copiedNum, setCopiedNum] = useState(false);
   const router = useRouter();
-  const amount = sharesCount * sharePrice;
+  const sharesNum = parseInt(sharesCount) || 0;
+  const amount = sharesNum * sharePrice;
 
   useEffect(() => {
     if (activePayments.length > 0 && !paymentMethod) {
@@ -52,11 +53,11 @@ export default function BuyShares() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (sharesCount <= 0) return setError('Enter a valid number of investment units.');
+    if (sharesNum <= 0) return setError('Enter a valid number of investment units.');
     if (!trxId.trim()) return setError('Enter the Transaction ID or Reference.');
     try {
       setLoading(true);
-      await requestShares(Number(sharesCount), paymentMethod, trxId.trim());
+      await requestShares(sharesNum, paymentMethod, trxId.trim());
       setSuccess(true);
     } catch (err) {
       setError(err.message || 'Failed to submit. Try again.');
@@ -74,7 +75,7 @@ export default function BuyShares() {
               <div className="success-glow"><Sparkles size={32} /></div>
               <h2>Request Submitted!</h2>
               <p className="success-msg">
-                Your request to purchase <strong>{sharesCount} investment units</strong> (৳{amount.toLocaleString()}) via <strong>{paymentMethod}</strong> has been submitted.
+                Your request to purchase <strong>{sharesNum} investment units</strong> (৳{amount.toLocaleString()}) via <strong>{paymentMethod}</strong> has been submitted.
               </p>
               <div className="success-detail">
                 <p><strong>TrxID:</strong> <code>{trxId}</code></p>
@@ -85,7 +86,7 @@ export default function BuyShares() {
                 <button className="btn btn-primary" onClick={() => router.push('/dashboard')}>
                   <SplitHoverText>Go to Dashboard</SplitHoverText>
                 </button>
-                <button className="btn btn-secondary" onClick={() => { setSuccess(false); setTrxId(''); setSharesCount(10); }}>
+                <button className="btn btn-secondary" onClick={() => { setSuccess(false); setTrxId(''); setSharesCount('1'); }}>
                   <SplitHoverText>Buy More</SplitHoverText>
                 </button>
               </div>
@@ -118,7 +119,9 @@ export default function BuyShares() {
                 <div className="form-group">
                   <label className="form-label">Number of Investment Units (৳{sharePrice.toLocaleString()} / Unit)</label>
                   <input type="number" min="1" className="form-control" value={sharesCount}
-                    onChange={(e) => setSharesCount(Math.max(1, parseInt(e.target.value) || 0))} required />
+                    onChange={(e) => setSharesCount(e.target.value)}
+                    onBlur={() => { if (!sharesCount || parseInt(sharesCount) < 1) setSharesCount('1'); }}
+                    onFocus={(e) => e.target.select()} required />
                 </div>
 
                 <div className="form-group">
@@ -143,7 +146,7 @@ export default function BuyShares() {
                 </div>
 
                 <div className="price-summary glass-panel">
-                  <div className="price-row"><span>Investment Units</span><span>{sharesCount}</span></div>
+                  <div className="price-row"><span>Investment Units</span><span>{sharesNum}</span></div>
                   <div className="price-row"><span>Price/Unit</span><span>৳{sharePrice.toLocaleString()}</span></div>
                   <div className="price-row price-total"><span>Total</span><span>৳{amount.toLocaleString()}</span></div>
                 </div>
