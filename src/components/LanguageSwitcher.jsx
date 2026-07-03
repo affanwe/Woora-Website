@@ -75,6 +75,10 @@ export default function LanguageSwitcher() {
           aria-label="Change language"
         >
           <span className="lang-flag">{currentLang.flag}</span>
+          <span className="lang-code">{currentLang.code.toUpperCase()}</span>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className={`lang-chevron ${open ? 'lang-chevron--open' : ''}`}>
+            <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
 
         {open && (
@@ -109,29 +113,31 @@ export default function LanguageSwitcher() {
         .lang-switcher-btn {
           display: flex;
           align-items: center;
-          justify-content: center;
-          width: 48px;
-          height: 48px;
-          padding: 0;
-          background: rgba(15, 15, 30, 0.85);
+          gap: 6px;
+          padding: 10px 14px;
+          background: rgba(15, 15, 30, 0.92);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 50%;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
           color: #fff;
+          font-size: 13px;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.25s ease;
           box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         .lang-switcher-btn:hover {
           border-color: rgba(0,208,156,0.4);
-          box-shadow: 0 4px 24px rgba(0,208,156,0.2);
-          transform: scale(1.08);
+          box-shadow: 0 4px 24px rgba(0,208,156,0.15);
         }
-        .lang-switcher-btn .lang-flag {
-          font-size: 24px;
-          line-height: 1;
+        .lang-flag { font-size: 18px; line-height: 1; }
+        .lang-code { letter-spacing: 0.5px; }
+        .lang-chevron {
+          transition: transform 0.2s ease;
+          opacity: 0.6;
         }
+        .lang-chevron--open { transform: rotate(180deg); }
         .lang-dropdown {
           position: absolute;
           bottom: calc(100% + 10px);
@@ -165,7 +171,7 @@ export default function LanguageSwitcher() {
           transition: all 0.15s ease;
         }
         .lang-option .lang-flag {
-          font-size: 20px;
+          font-size: 18px;
           line-height: 1;
         }
         .lang-option:hover {
@@ -190,11 +196,8 @@ export default function LanguageSwitcher() {
             left: 16px;
           }
           .lang-switcher-btn {
-            width: 44px;
-            height: 44px;
-          }
-          .lang-switcher-btn .lang-flag {
-            font-size: 22px;
+            padding: 8px 12px;
+            font-size: 12px;
           }
         }
       `}</style>
