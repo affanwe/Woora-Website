@@ -6,8 +6,8 @@ import {
   Eye,
   Target,
   ShieldCheck,
-  Lightbulb,
-  Lock,
+  Heart,
+  Handshake,
   Sprout,
   CalendarDays,
   Users,
@@ -33,7 +33,7 @@ function formatInvestors(count) {
   return `${count}+`;
 }
 
-const VALUE_ICONS = [ShieldCheck, Lightbulb, Lock, Sprout];
+const VALUE_ICONS = [ShieldCheck, Heart, Handshake, Sprout];
 
 export default function About() {
   const { about: aboutSettings, company } = useSiteSettings();
@@ -80,8 +80,7 @@ export default function About() {
           </ScrollReveal>
           <ScrollReveal direction="up" delay={0.3}>
             <p className="about-hero__subtitle">
-              Connecting everyday investors with institutional-grade opportunities.
-              Building wealth together through transparency, technology, and trust.
+              A multi-venture company from Bangladesh, building honest businesses that everyday people can invest in — and see exactly how their money is working, every single day.
             </p>
           </ScrollReveal>
         </div>
@@ -96,13 +95,7 @@ export default function About() {
               <div className="about-story__text-block">
                 <span className="section-label">Our Story</span>
                 <h2 className="about-story__heading">
-                  {aboutSettings?.storyHeading?.split(' in ').map((part, i, arr) =>
-                    i < arr.length - 1
-                      ? <React.Fragment key={i}>{part}<br />in <span className="gradient-text-gold">{arr[i + 1]}</span></React.Fragment>
-                      : i === 0 && arr.length === 1
-                        ? <React.Fragment key={i}>{part}</React.Fragment>
-                        : null
-                  )}
+                  {aboutSettings?.storyHeading || "Building Bangladesh's Most Transparent Company"}
                 </h2>
                 {(aboutSettings?.storyParagraphs || []).map((p, idx) => (
                   <p key={idx} className="about-story__paragraph">{p}</p>
@@ -168,8 +161,7 @@ export default function About() {
               <span className="section-label">What Drives Us</span>
               <h2 className="about-values__title">Our Core Values</h2>
               <p className="about-values__subtitle">
-                These principles guide every decision we make and every project we
-                launch.
+                Four principles that shape every decision we make — from what we sell, to how we treat the people who invest in us.
               </p>
             </div>
           </ScrollReveal>

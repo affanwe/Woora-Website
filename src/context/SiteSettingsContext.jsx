@@ -37,21 +37,22 @@ const DEFAULT_HOME = {
 };
 
 const DEFAULT_ABOUT = {
-  storyHeading: 'Democratizing Investment Access in Bangladesh',
+  storyHeading: "Building Bangladesh's Most Transparent Company",
   storyParagraphs: [
-    'Founded with a vision to democratize investment access in Bangladesh, WOORA Group connects everyday investors with institutional-grade opportunities across Real Estate, Technology, Agriculture, and Renewable Energy sectors.',
-    "We believe that wealth creation shouldn't be reserved for the privileged few. By fractionalizing ownership of premium assets into affordable shares starting at just ৳500, we've opened the doors for Bangladeshi citizens to participate in institutional-quality investments that were previously inaccessible.",
-    'Our team comprises seasoned financial analysts, technology experts, and industry veterans who work tirelessly to identify, vet, and manage high-yield opportunities — so our investors can grow their wealth with confidence.',
+    "WOORA Group started from a simple frustration. In Bangladesh, if you want to invest in a real business, you usually need big connections, a lot of money, or blind trust in people you'll never meet. We wanted to change that.",
+    "We're a multi-venture company — meaning we don't do just one thing. Our first live project is WOORA Healthy Dessert, a hygienic fruit dessert brand serving fresh, additive-free cups on the streets of Dhaka. More ventures are already on the way, across different industries.",
+    "But here's what actually makes us different: every Investment Partner sees everything. Daily sales, daily profit, every business update — all shared openly. No hidden numbers, no vague quarterly reports, no \"just trust us.\"",
+    'We believe a company should earn its Investment Partners\' trust every day, not only on payout day.',
   ],
-  mission: 'To empower every citizen of Bangladesh with accessible, transparent, and high-yield investment opportunities. We strive to break down financial barriers and build a platform where anyone — regardless of economic background — can participate in institutional-grade asset ownership and create sustainable, generational wealth.',
-  vision: "To become South Asia's most trusted fractional investment platform by 2030, managing over ৳50 Billion in diversified assets. We envision a future where technology-driven financial inclusion eliminates inequality and creates a thriving community of empowered investors building wealth together.",
+  mission: 'To build a group of honest, hygienic, and profitable businesses in Bangladesh — and give ordinary people the chance to become Investment Partners from as little as ৳500 per Investment Unit. We want to prove that transparency, clean products, and shared growth aren\'t optional extras. They are the foundation.',
+  vision: "To become Bangladesh's most trusted multi-venture company — where every Investment Partner knows exactly where their money is, how it's performing, and what it's earning, almost in real time. Wherever WOORA expands next — food, tech, or beyond — the promise stays the same: nothing hidden, nothing compromised on quality.",
   visionYear: '2030',
   visionTarget: '৳50 Billion',
   values: [
-    { title: 'Transparency', description: 'Every investment decision, fund allocation, and project update is shared openly with our investor community. No hidden fees, no surprises.' },
-    { title: 'Innovation', description: 'We leverage cutting-edge fintech, blockchain verification, and AI-driven analytics to identify and manage the highest-potential investment opportunities.' },
-    { title: 'Security', description: 'Enterprise-grade data encryption, multi-layer admin verification, and strict regulatory compliance protect every transaction and investor account.' },
-    { title: 'Growth', description: 'Our diversified portfolio strategy across multiple high-growth sectors ensures consistent, compounding returns for long-term wealth creation.' },
+    { title: 'Transparency', description: 'Every daily sale, every taka of profit, every business decision is shared openly with our Investment Partners. You will never have to guess how your investment is doing. If we know it, you know it.' },
+    { title: 'Purity', description: "No adulteration. No shortcuts. If we sell fruit, it's fresh. The day WOORA sells chicken, it'll be healthy, fresh chicken — never anything unsafe or low-grade. What goes on our shelf is what we'd feed our own families." },
+    { title: 'Trust', description: "Your Investment Unit is protected by clear agreements, a Reserve Fund for buyback, and a strict lock-in and exit structure. We treat Investment Partner capital the way we'd want ours treated — carefully." },
+    { title: 'Growth', description: "We're not building one shop. We're building a group. Every profitable venture funds the next one, and every Investment Partner grows with us as WOORA expands into new categories." },
   ],
 };
 
