@@ -215,7 +215,7 @@ export function AuthProvider({ children }) {
   }, [userData?.id]);
 
   // Sign Up / Register — simplified: email + mobile + password only
-  async function register(email, mobile, password, referredBy) {
+  async function register(name, email, mobile, password, referredBy) {
     try {
       const { data: existingInvestor } = await supabase
         .from('investors')
@@ -244,7 +244,7 @@ export function AuthProvider({ children }) {
 
       // Link existing record if uid-less
       if (existingInvestor && !existingInvestor.uid) {
-        await supabase.from('investors').update({ uid: user.id, mobile, is_activated: false }).eq('id', existingInvestor.id);
+        await supabase.from('investors').update({ uid: user.id, name: name || null, mobile, is_activated: false }).eq('id', existingInvestor.id);
         return;
       }
 
@@ -253,7 +253,7 @@ export function AuthProvider({ children }) {
       const { error: investorError } = await supabase.from('investors').insert({
         id: tempId,
         uid: user.id,
-        name: null,
+        name: name || null,
         email,
         mobile,
         shares: 0,

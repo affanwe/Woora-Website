@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { UserPlus, Eye, EyeOff, Mail, Lock, Phone, ArrowRight, ShieldCheck } from 'lucide-react';
+import { UserPlus, Eye, EyeOff, Mail, Lock, Phone, ArrowRight, ShieldCheck, User } from 'lucide-react';
 import SplitHoverText from '../../components/SplitHoverText';
 import ScrollReveal from '../../components/ScrollReveal';
 
@@ -18,6 +18,7 @@ export default function Register() {
 
 function RegisterInner() {
   const [step, setStep] = useState(1); // 1=form, 2=otp
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +54,7 @@ function RegisterInner() {
   }, [resendTimer]);
 
   const handleSendOtp = async () => {
+    if (!fullName.trim()) return setError('Please enter your full name.');
     if (!email) return setError('Please enter your email.');
     if (!mobile) return setError('Please enter your mobile number.');
     if (password.length < 6) return setError('Password must be at least 6 characters.');
@@ -130,7 +132,7 @@ function RegisterInner() {
       }
 
       // OTP verified, now register
-      await register(email.trim(), mobile.trim(), password, referredBy || null);
+      await register(fullName.trim(), email.trim(), mobile.trim(), password, referredBy || null);
       router.push('/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -179,6 +181,15 @@ function RegisterInner() {
 
             {step === 1 ? (
               <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }} className="auth-form-3d">
+                <div className="form-group">
+                  <label className="form-label-3d" htmlFor="reg-name">Full Name</label>
+                  <div className="input-icon-wrapper-3d">
+                    <User className="input-icon-3d" size={18} />
+                    <input id="reg-name" type="text" className="form-control-3d" placeholder="Your full name"
+                      value={fullName} onChange={e => setFullName(e.target.value)} required autoComplete="name" />
+                  </div>
+                </div>
+
                 <div className="form-group">
                   <label className="form-label-3d" htmlFor="reg-email">Email Address</label>
                   <div className="input-icon-wrapper-3d">
