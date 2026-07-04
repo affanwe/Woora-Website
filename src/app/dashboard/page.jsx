@@ -295,16 +295,9 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <Link href="/buy-shares" className="btn btn-primary">
-                <Plus size={16} /> <SplitHoverText>Buy Investment Units</SplitHoverText>
-              </Link>
-              {(userData?.shares || 0) > 0 && (
-                <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary btn-sell">
-                  <Minus size={16} /> <SplitHoverText>Sell Units</SplitHoverText>
-                </button>
-              )}
-            </div>
+            <Link href="/buy-shares" className="btn btn-primary">
+              <Plus size={16} /> <SplitHoverText>Buy Investment Units</SplitHoverText>
+            </Link>
           </header>
         </ScrollReveal>
 
@@ -329,6 +322,17 @@ export default function Dashboard() {
             ))}
           </div>
         </ScrollReveal>
+
+        {/* Sell Units Button */}
+        {(userData?.shares || 0) > 0 && (
+          <ScrollReveal delay={0.12}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+              <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary btn-sell">
+                <Minus size={16} /> <SplitHoverText>Sell Units</SplitHoverText>
+              </button>
+            </div>
+          </ScrollReveal>
+        )}
 
         {/* Profit Overview — chart + quick stats */}
         <ScrollReveal delay={0.15}>
