@@ -271,7 +271,7 @@ export default function Dashboard() {
     { icon: Layers, tone: 'emerald', value: totalUnits.toLocaleString(), label: 'Total Investment Units', hint: freeUnits > 0 ? `incl. ${freeUnits} free` : null },
     { icon: Wallet, tone: 'gold', value: `৳${investedAmount.toLocaleString()}`, label: 'Capital Invested', hint: null },
     { icon: TrendingUp, tone: 'blue', value: `৳${totalProfit.toLocaleString()}`, label: 'Total Profit Earned', hint: trendPct !== null ? `${trendPct >= 0 ? '+' : ''}${trendPct}% vs last quarter` : null, hintTone: trendPct !== null && trendPct < 0 ? 'down' : 'up' },
-    { icon: ShieldCheck, tone: accountStatus === 'Active' ? 'emerald' : 'warning', value: accountStatus, label: 'Account Status', isBadge: true },
+    { icon: ShieldCheck, tone: accountStatus === 'Active' ? 'emerald' : 'warning', value: (userData?.shares || 0).toLocaleString(), label: 'Investment Units', hint: accountStatus === 'Active' ? 'Active' : 'Pending' },
   ];
 
   return (
