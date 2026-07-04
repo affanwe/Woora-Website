@@ -323,17 +323,6 @@ export default function Dashboard() {
           </div>
         </ScrollReveal>
 
-        {/* Sell Units Button */}
-        {(userData?.shares || 0) > 0 && (
-          <ScrollReveal delay={0.12}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-              <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary btn-sell">
-                <Minus size={16} /> <SplitHoverText>Sell Units</SplitHoverText>
-              </button>
-            </div>
-          </ScrollReveal>
-        )}
-
         {/* Profit Overview — chart + quick stats */}
         <ScrollReveal delay={0.15}>
           <div className="dash-card glass-panel" style={{ marginBottom: '1.5rem' }}>
@@ -492,6 +481,13 @@ export default function Dashboard() {
                     <h4>No Investments Yet</h4>
                     <p>Submit your first investment unit purchase request to get started.</p>
                     <Link href="/buy-shares" className="btn btn-secondary">Buy Investment Units</Link>
+                  </div>
+                )}
+                {(userData?.shares || 0) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                    <button onClick={() => { setShowSellModal(true); setSellError(''); setSellSuccess(''); }} className="btn btn-secondary btn-sell">
+                      <Minus size={16} /> <SplitHoverText>Sell Units</SplitHoverText>
+                    </button>
                   </div>
                 )}
               </div>
