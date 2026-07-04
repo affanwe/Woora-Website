@@ -149,11 +149,12 @@ export function AuthProvider({ children }) {
       setReturnPayments(mapped);
 
       const now = new Date();
-      const currentMonth = now.getMonth() + 1;
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const currentMonthName = monthNames[now.getMonth()];
       const currentYear = now.getFullYear();
       const totalProfit = mapped.reduce((sum, p) => sum + (p.amount || 0), 0);
       const pendingProfit = mapped.filter(p => p.status === 'Pending').reduce((sum, p) => sum + (p.amount || 0), 0);
-      const thisMonthPayment = mapped.find(p => p.month === currentMonth && p.year === currentYear);
+      const thisMonthPayment = mapped.find(p => p.month === currentMonthName && p.year === currentYear);
       setProfitData({
         totalProfit,
         pendingProfit,
