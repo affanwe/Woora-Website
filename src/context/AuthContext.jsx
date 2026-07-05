@@ -231,14 +231,12 @@ export function AuthProvider({ children }) {
       const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
       let user = authData?.user;
 
-      if (authError) {
-        if (authError.message?.includes('already registered') || authError.status === 422) {
-          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-          if (signInError) throw new Error("This email is already registered. Please login instead.");
-          user = signInData?.user;
-        } else {
-          throw new Error(authError.message || "Failed to create user account.");
-        }
+      const isFakeUser = user && (!user.identities || user.identities.length === 0);
+
+      if (authError || isFakeUser) {
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw new Error("This email is already registered. Please login instead.");
+        user = signInData?.user;
       }
 
       if (!user) throw new Error("Failed to retrieve user account. Please try again.");
@@ -247,6 +245,13 @@ export function AuthProvider({ children }) {
       if (existingInvestor && !existingInvestor.uid) {
         await supabase.from('investors').update({ uid: user.id, name: name || null, mobile, is_activated: false }).eq('id', existingInvestor.id);
         return;
+      }
+
+      // Validate referredBy exists
+      let validReferrer = null;
+      if (referredBy) {
+        const { data: refCheck } = await supabase.from('investors').select('id').eq('id', referredBy).maybeSingle();
+        if (refCheck) validReferrer = referredBy;
       }
 
       // Create investor record with temporary ID (real ID assigned on activation)
@@ -261,7 +266,7 @@ export function AuthProvider({ children }) {
         amount: 0,
         awarded_free_shares: 0,
         is_activated: false,
-        referred_by: referredBy || null
+        referred_by: validReferrer
       });
 
       if (investorError) {
