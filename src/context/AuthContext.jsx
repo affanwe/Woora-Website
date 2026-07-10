@@ -384,8 +384,8 @@ export function AuthProvider({ children }) {
   // Create sell request
   async function requestSellShares(sharesCount) {
     if (!currentUser || !userData) throw new Error("Must be logged in.");
-    if (sharesCount <= 0) throw new Error("Please enter a valid number of shares.");
-    if (sharesCount > (userData.shares || 0)) throw new Error("You don't have enough shares to sell.");
+    if (sharesCount <= 0) throw new Error("Please enter a valid number of investment units.");
+    if (sharesCount > (userData.shares || 0)) throw new Error("You don't have enough investment units to sell.");
 
     const amount = sharesCount * 500;
 

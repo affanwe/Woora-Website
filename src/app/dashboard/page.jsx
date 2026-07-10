@@ -108,13 +108,20 @@ export default function Dashboard() {
   const recentRequests = (shareRequests || []).slice(0, 5);
 
   const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const fullMonthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const monthToIndex = (m) => {
+    if (typeof m === 'number') return m;
+    const idx = fullMonthNames.indexOf(m);
+    return idx >= 0 ? idx + 1 : 1;
+  };
 
   // This quarter's profit (returns are distributed quarterly)
   const thisQuarterProfit = useMemo(() => {
     const now = new Date();
     const q = Math.floor(now.getMonth() / 3);
     return (returnPayments || [])
-      .filter(p => p.year === now.getFullYear() && Math.floor(((p.month || 1) - 1) / 3) === q)
+      .filter(p => p.year === now.getFullYear() && Math.floor((monthToIndex(p.month) - 1) / 3) === q)
       .reduce((s, p) => s + (p.amount || 0), 0);
   }, [returnPayments]);
 
@@ -122,7 +129,7 @@ export default function Dashboard() {
   const chartData = useMemo(() => {
     const map = new Map();
     (returnPayments || []).forEach(p => {
-      const q = Math.floor(((p.month || 1) - 1) / 3) + 1;
+      const q = Math.floor((monthToIndex(p.month) - 1) / 3) + 1;
       const key = `${p.year}-${q}`;
       map.set(key, (map.get(key) || 0) + (p.amount || 0));
     });
